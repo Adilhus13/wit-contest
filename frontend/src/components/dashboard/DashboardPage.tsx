@@ -78,16 +78,25 @@ export default function DashboardPage() {
 
   const [rows, setRows] = useState<UiPlayerRow[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [search, setSearch] = useState<string>("");
+  const [debouncedSearch, setDebouncedSearch] = useState<string>("")
 
-const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [selectedId, setSelectedId] = useState<number | null>(null);
 
   const season = 2023;
   const limit = 30;
   const page = 1;
-  const sort = "touchdowns"; // or whatever your API default expects; change if needed
+  const sort = "touchdowns";
   const order = "desc";
 
-    useEffect(() => {
+
+  
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedSearch(search.trim()), 250);
+    return () => clearTimeout(t);
+  }, [search]);
+
+  useEffect(() => {
     let cancelled = false;
 
     (async () => {
@@ -95,10 +104,18 @@ const [selectedId, setSelectedId] = useState<number | null>(null);
         setLoading(true);
         const token = await getToken();
 
-        const res = await apiGet<LeaderboardResponse>(
-          `/leaderboard?season=${season}&limit=${limit}&page=${page}&sort=${sort}&order=${order}`,
-          token
-        );
+        const queryString = new URLSearchParams({
+          season: String(season),
+          limit: String(limit),
+          page: String(page),
+          sort,
+          order,
+        });
+
+        if (debouncedSearch) queryString.set("search", debouncedSearch);
+
+        const res = await apiGet<LeaderboardResponse>(`/leaderboard?${queryString.toString()}`, token);
+
 
         const mapped = res.data.map(mapRow);
 
@@ -123,9 +140,9 @@ const [selectedId, setSelectedId] = useState<number | null>(null);
       cancelled = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [season]);
+  }, [season, limit, page, sort, order, debouncedSearch]);
 
-    const selected = useMemo(
+  const selected = useMemo(
     () => rows.find((p) => p.id === selectedId) ?? rows[0],
     [rows, selectedId]
   );
@@ -151,6 +168,8 @@ const [selectedId, setSelectedId] = useState<number | null>(null);
           </div>
 
           <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
             placeholder="SEARCH"
             className="h-8.5 w-70 rounded-md border border-black/20 px-4 text-sm outline-none placeholder:text-black/30"
           />
