@@ -1,9 +1,51 @@
-import { mockGames } from "@/lib/mockData";
+import { apiGet, getToken } from "@/lib/api";
+import { useEffect, useState } from "react";
+
+type GameDto = {
+  id: number;
+  season?: number | null;
+  date: string;
+  stadium: string | null;
+  opponentCity: string | null;
+  opponentName: string | null;
+  result: "W" | "L";
+  score: string;
+};
+
 
 export default function TopScoreboard() {
+
+  const [games, setGames] = useState<GameDto[]>([]);
+  const [loading, setLoading] = useState<boolean>(true)
+
+  useEffect(() => {
+   let cancelled = false;
+   
+   
+   (async () => {
+    try {
+      const token = await getToken();
+      console.log("TOKENNNNN: ", token)
+      const res = await apiGet<{data: GameDto[] }>(`/games?limit=12`, token)
+      if(!cancelled) setGames(res.data);
+    }catch (e) {
+      console.error(e);
+      if(!cancelled) setGames([])
+    } finally {
+      if(!cancelled) setLoading(false);
+    }
+   })();
+
+   return () => {
+    cancelled = true
+   }
+  }, [])
+
+  if (loading) return <section className="h-full bg-[linear-gradient(180deg,#C00000_0%,#6B0000_70%)]" />;
+
   return (
     <section className="h-full bg-[linear-gradient(180deg,#C00000_0%,#6B0000_70%)]">
-      <div className="py-10">
+      <div className="pt-10">
       <div className="flex items-center justify-between text-white mx-100">
         <div className="flex text-4xl">
           <img src="49ers-logo.png"/>
@@ -13,12 +55,12 @@ export default function TopScoreboard() {
           <p>2023 - 2024 SEASON</p>
         </div>
       </div>
-        <p className="rounded-xl p-[0.5px] bg-gradient-to-r from-neutral-400 via-gray-300 to-neutral-400 w-full mt-10"></p>
+        <p className="rounded-xl p-[0.5px] bg-linear-to-r from-neutral-400 via-gray-300 to-neutral-400 w-full mt-10"></p>
       </div>
-      <div className="h-full px-8 py-6 flex items-center">
+      <div className="h-100 px-8 pb-6 flex items-center">
         <div className="flex gap-6 overflow-x-auto no-scrollbar">
-          {mockGames.map((g, idx) => {
-            const bg = g.variant === "white" ? "bg-white" : "bg-[#B3995D]";
+          {games.map((g, idx) => {
+            const bg = "bg-[#B3995D]";
             return (
               <div
                 key={idx}
@@ -61,8 +103,6 @@ export default function TopScoreboard() {
           })}
         </div>
       </div>
-
-      <div className="h-4.5 bg-[linear-gradient(90deg,#C00000_0%,#8A0000_50%,#C00000_100%)]" />
     </section>
   );
 }

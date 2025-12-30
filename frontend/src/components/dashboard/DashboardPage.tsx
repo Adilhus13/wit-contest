@@ -1,22 +1,139 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import TopScoreboard from "./TopScoreboard";
 import FilterSidebar from "./FilterSidebar";
 import LeaderboardTable from "./LeaderboardTable";
 import RightPanel from "./RightPanel";
 import { mockPlayers } from "@/lib/mockData";
+import { apiGet, getToken } from "@/lib/api";
+
+type LeaderboardApiRow = {
+  id: number;
+  season_rank?: number | null;
+  game_rank?: number | null;
+
+  jersey_number?: number | null;
+  first_name: string;
+  last_name: string;
+
+  position?: string | null;
+  height_in?: number | null;
+  weight_lb?: number | null;
+  age?: number | null;
+  experience_years?: number | null;
+  college?: string | null;
+};
+
+type LeaderboardResponse = {
+  data: LeaderboardApiRow[];
+  links: unknown;
+  meta: unknown;
+};
+
+type UiPlayerRow = {
+  id: number;
+  seasonRank: number;
+  gameRank: number;
+  jersey: number;
+  firstName: string;
+  lastName: string;
+  pos: string;
+  ht: string;
+  wt: number;
+  age: number;
+  exp: number;
+  college: string;
+};
+
+function heightInToFtIn(heightIn: number | null | undefined): string {
+  if (!heightIn || heightIn <= 0) return "";
+  const feet = Math.floor(heightIn / 12);
+  const inches = heightIn % 12;
+  return `${feet}-${inches}`;
+}
+
+function mapRow(r: LeaderboardApiRow, idx: number): UiPlayerRow {
+  const rawId = (r as any).id ?? (r as any).player_id; 
+  const id = Number(rawId);
+  const safeId = Number.isFinite(id) && id > 0 ? id : idx + 1;
+
+  return {
+    id: safeId,
+    seasonRank: Number(r.season_rank ?? idx + 1),
+    gameRank: Number(r.game_rank ?? idx + 1),
+    jersey: Number(r.jersey_number ?? 0),
+    firstName: r.first_name ?? "",
+    lastName: r.last_name ?? "",
+    pos: (r.position ?? "").toUpperCase(),
+    ht: heightInToFtIn(r.height_in),
+    wt: Number(r.weight_lb ?? 0),
+    age: Number(r.age ?? 0),
+    exp: Number(r.experience_years ?? 0),
+    college: r.college ?? "",
+  };
+}
 
 export default function DashboardPage() {
-  const [selectedId, setSelectedId] = useState<number | null>(null);
-  const selected = useMemo(
-    () => mockPlayers.find((p) => p.id === selectedId) ?? mockPlayers[0],
-    [selectedId]
+
+  const [rows, setRows] = useState<UiPlayerRow[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+
+const [selectedId, setSelectedId] = useState<number | null>(null);
+
+  const season = 2023;
+  const limit = 30;
+  const page = 1;
+  const sort = "touchdowns"; // or whatever your API default expects; change if needed
+  const order = "desc";
+
+    useEffect(() => {
+    let cancelled = false;
+
+    (async () => {
+      try {
+        setLoading(true);
+        const token = await getToken();
+
+        const res = await apiGet<LeaderboardResponse>(
+          `/leaderboard?season=${season}&limit=${limit}&page=${page}&sort=${sort}&order=${order}`,
+          token
+        );
+
+        const mapped = res.data.map(mapRow);
+
+        if (!cancelled) {
+          setRows(mapped);
+
+          setSelectedId((prev) => {
+            if (mapped.length === 0) return null;
+            if (prev && mapped.some((p) => p.id === prev)) return prev;
+            return mapped[0].id;
+          });
+        }
+      } catch (e) {
+        console.error(e);
+        if (!cancelled) setRows([]);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [season]);
+
+    const selected = useMemo(
+    () => rows.find((p) => p.id === selectedId) ?? rows[0],
+    [rows, selectedId]
   );
+
 
   return (
     <div className="min-h-screen w-full bg-white">
-      <div className="h-full">
+      <div className="h-120">
         <TopScoreboard />
       </div>
 
@@ -52,10 +169,13 @@ export default function DashboardPage() {
             <div className="flex gap-8 items-start">
               <div className="flex-1 min-w-0">
                 <LeaderboardTable
-                  rows={mockPlayers.slice(0, 30)}
-                  selectedId={selectedId}
-                  onSelect={setSelectedId}
+                rows={rows}
+                selectedId={selectedId}
+                onSelect={setSelectedId}
                 />
+                {loading && (
+                  <div className="mt-3 text-sm text-black/50">Loading leaderboard…</div>
+                )}
               </div>
             </div>
           </div>

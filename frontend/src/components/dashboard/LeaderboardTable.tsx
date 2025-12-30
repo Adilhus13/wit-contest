@@ -1,10 +1,30 @@
 "use client";
 
 import clsx from "clsx";
-import type { PlayerRow } from "@/lib/mockData";
+
+export type LeaderboardRow = {
+  id: number;
+
+  seasonRank: number;
+  gameRank: number;
+
+  jersey: number;
+
+  firstName: string;
+  lastName: string;
+
+  pos: string;
+  ht: string;     
+  wt: number;    
+
+  age: number;
+  exp: number;
+
+  college: string;
+};
 
 type Props = {
-  rows: PlayerRow[];
+  rows: LeaderboardRow[];
   selectedId: number | null;
   onSelect: (id: number | null) => void;
 };
@@ -25,12 +45,12 @@ export default function LeaderboardTable({ rows, selectedId, onSelect }: Props) 
         <HeaderCell label="AGE" />
         <HeaderCell label="EXP" />
         <HeaderCell label="COLLEGE" />
-        <div className="h-[56px]" />
+        <div className="h-14" />
       </div>
 
       <div className="bg-white h-screen overflow-y-scroll">
         {rows.map((r, idx) => {
-          const selected = r.id === selectedId;
+          const selected = selectedId !== null && r.id === selectedId;
           return (
             <button
               key={r.id}
@@ -73,7 +93,7 @@ export default function LeaderboardTable({ rows, selectedId, onSelect }: Props) 
 
 function HeaderCell({ label }: { label: string }) {
   return (
-    <div className="h-[56px] flex items-center px-3 border-r border-white/10">
+    <div className="h-14 flex items-center px-3 border-r border-white/10">
       <span className="text-[11px] font-extrabold tracking-[0.22em] uppercase text-[#F7E37A]">
         {label}
       </span>

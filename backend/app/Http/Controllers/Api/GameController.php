@@ -23,30 +23,38 @@ class GameController extends Controller
                 'id',
                 'season',
                 'game_date',
-                'location',
-                'stadium',
+                'opponent',
                 'opponent_city',
                 'opponent_name',
+                'location',
+                'sf_score',
+                'opp_score',
                 'result',
-                'team_score',
-                'opponent_score',
+                'venue',
+                'stadium',
             ])
             ->orderByDesc('game_date');
 
-        if ($season) {
+        if ($season !== null) {
             $q->where('season', $season);
         }
 
-        $games = $q->limit($limit)->get()->map(function ($g) {
+        $games = $q->limit($limit)->get()->map(function (Game $g) {
+            $result = $g->result ?: (($g->sf_score >= $g->opp_score) ? 'W' : 'L');
+
+            $oppCity = $g->opponent_city;
+            $oppName = $g->opponent_name ?: (is_string($g->opponent) ? strtoupper($g->opponent) : null);
+
             return [
                 'id' => $g->id,
                 'season' => $g->season,
                 'date' => optional($g->game_date)->format('F j, Y'),
-                'stadium' => $g->stadium ?? $g->location,
-                'opponentCity' => $g->opponent_city,
-                'opponentName' => $g->opponent_name,
-                'result' => strtoupper((string) $g->result) === 'W' ? 'W' : 'L',
-                'score' => "{$g->team_score}-{$g->opponent_score}",
+                'stadium' => $g->stadium ?? $g->venue,
+                'opponentCity' => $oppCity,
+                'opponentName' => $oppName,
+                'result' => $result,
+                'score' => "{$g->sf_score}-{$g->opp_score}",
+                'location' => $g->location,
             ];
         });
 
