@@ -8,6 +8,9 @@ import RightPanel from "./RightPanel";
 import { mockPlayers } from "@/lib/mockData";
 import { apiGet, getToken } from "@/lib/api";
 
+export type SortKey = "season_rank" | "game_rank" | "first_name" | "last_name" | 'jersey_number' | 'age' | 'position' | 'height_in' | 'weight_lb' | 'experience_years' | 'college';
+export type SortOrder = "asc" | "desc";
+
 type LeaderboardApiRow = {
   id: number;
   season_rank?: number | null;
@@ -28,7 +31,7 @@ type LeaderboardApiRow = {
 type LeaderboardResponse = {
   data: LeaderboardApiRow[];
   links: unknown;
-  meta: unknown;
+  meta: PaginatorMeta;
 };
 
 type UiPlayerRow = {
@@ -44,6 +47,15 @@ type UiPlayerRow = {
   age: number;
   exp: number;
   college: string;
+};
+
+type PaginatorMeta = {
+  current_page: number;
+  last_page: number;
+  per_page: number;
+  total: number;
+  from?: number | null;
+  to?: number | null;
 };
 
 function heightInToFtIn(heightIn: number | null | undefined): string {
@@ -80,16 +92,20 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState<boolean>(true);
   const [search, setSearch] = useState<string>("");
   const [debouncedSearch, setDebouncedSearch] = useState<string>("")
+  const [page, setPage] = useState<number>(1);
+  const [meta, setMeta] = useState<PaginatorMeta | null>(null);
+  const [limit, setLimit] = useState<number>(20);
+  const [sort, setSort] = useState<SortKey>("season_rank");
+  const [order, setOrder] = useState<SortOrder>("asc");
+
 
   const [selectedId, setSelectedId] = useState<number | null>(null);
 
   const season = 2023;
-  const limit = 30;
-  const page = 1;
-  const sort = "touchdowns";
-  const order = "desc";
 
-
+  useEffect(() => {
+    setPage(1);
+  }, [debouncedSearch]);
   
   useEffect(() => {
     const t = setTimeout(() => setDebouncedSearch(search.trim()), 250);
@@ -121,6 +137,7 @@ export default function DashboardPage() {
 
         if (!cancelled) {
           setRows(mapped);
+          setMeta(res.meta ?? null);
 
           setSelectedId((prev) => {
             if (mapped.length === 0) return null;
@@ -130,7 +147,11 @@ export default function DashboardPage() {
         }
       } catch (e) {
         console.error(e);
-        if (!cancelled) setRows([]);
+        if (!cancelled) {
+          setRows([]);
+          setMeta(null);
+          setSelectedId(null);
+        }
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -146,6 +167,15 @@ export default function DashboardPage() {
     () => rows.find((p) => p.id === selectedId) ?? rows[0],
     [rows, selectedId]
   );
+
+  const canPrev = page > 1;
+  const canNext = meta ? page < meta.last_page : rows.length === limit; // fallback if meta missing
+
+  function handleSortChange(next: SortKey) {
+    setPage(1);
+    setOrder((prev) => (sort === next ? (prev === "asc" ? "desc" : "asc") : "asc"));
+    setSort(next);
+  }
 
 
   return (
@@ -188,10 +218,85 @@ export default function DashboardPage() {
             <div className="flex gap-8 items-start">
               <div className="flex-1 min-w-0">
                 <LeaderboardTable
-                rows={rows}
-                selectedId={selectedId}
-                onSelect={setSelectedId}
+                  rows={rows}
+                  selectedId={selectedId}
+                  onSelect={setSelectedId}
+                  sort={sort}
+                  order={order}
+                  onSortChange={handleSortChange}
                 />
+
+                {/* PAGINATION CONTROLS */}
+                <div className="mt-4 flex items-center justify-between">
+                  <div className="text-sm text-black/60">
+                    {meta ? (
+                      <>
+                        Showing{" "}
+                        <span className="font-semibold text-black/80">{meta.from ?? "-"}</span>–
+                        <span className="font-semibold text-black/80">{meta.to ?? "-"}</span> of{" "}
+                        <span className="font-semibold text-black/80">{meta.total}</span>
+                      </>
+                    ) : (
+                      <span>{loading ? "Loading…" : `Showing ${rows.length} rows`}</span>
+                    )}
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-semibold text-black/60">ROWS</span>
+                      <select
+                        value={limit}
+                        onChange={(e) => {
+                          setPage(1);
+                          setLimit(Number(e.target.value));
+                        }}
+                        className="h-9 rounded-md border border-black/20 px-2 text-sm outline-none"
+                      >
+                        <option value={10}>10</option>
+                        <option value={20}>20</option>
+                        <option value={30}>30</option>
+                        <option value={50}>50</option>
+                      </select>
+                    </div>
+
+                    <button
+                      type="button"
+                      disabled={!canPrev || loading}
+                      onClick={() => setPage((p) => Math.max(1, p - 1))}
+                      className={`h-9 px-4 rounded-md border text-sm font-semibold ${
+                        !canPrev || loading
+                          ? "border-black/10 text-black/30"
+                          : "border-black/20 text-black/70 hover:bg-black/[0.03]"
+                      }`}
+                    >
+                      Prev
+                    </button>
+
+                    <div className="text-sm font-semibold text-black/70">
+                      Page <span className="text-black">{page}</span>
+                      {meta ? (
+                        <>
+                          {" "}
+                          / <span className="text-black">{meta.last_page}</span>
+                        </>
+                      ) : null}
+                    </div>
+
+                    <button
+                      type="button"
+                      disabled={!canNext || loading}
+                      onClick={() => setPage((p) => p + 1)}
+                      className={`h-9 px-4 rounded-md border text-sm font-semibold ${
+                        !canNext || loading
+                          ? "border-black/10 text-black/30"
+                          : "border-black/20 text-black/70 hover:bg-black/[0.03]"
+                      }`}
+                    >
+                      Next
+                    </button>
+                  </div>
+                </div>
+
                 {loading && (
                   <div className="mt-3 text-sm text-black/50">Loading leaderboard…</div>
                 )}
