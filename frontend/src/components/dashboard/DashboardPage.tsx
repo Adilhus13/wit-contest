@@ -213,7 +213,43 @@ export default function DashboardPage() {
 
   setModalOpen(false);
   setRefreshKey((k) => k + 1);
-};
+  };
+
+  async function exportCsv() {
+    const token = await getToken();
+
+    const qs = new URLSearchParams({
+      season: String(season),
+      sort,
+      order,
+    });
+
+    if (debouncedSearch) qs.set("search", debouncedSearch);
+
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/leaderboard/export?${qs.toString()}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "text/csv",
+      },
+    });
+
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(`Export failed (${res.status}): ${text}`);
+    }
+
+    const blob = await res.blob();
+    const url = window.URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `49ers_leaderboard_${season}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+
+    window.URL.revokeObjectURL(url);
+  }
 
   return (
     <div className="min-h-screen w-full bg-white">
@@ -241,9 +277,13 @@ export default function DashboardPage() {
             className="h-8.5 w-70 rounded-md border border-black/20 px-4 text-sm outline-none placeholder:text-black/30"
           />
 
-          <div className="text-[14px] font-semibold tracking-[0.28em] text-[#C00000] uppercase">
+          <button
+            type="button"
+            onClick={() => exportCsv().catch(console.error)}
+            className="text-[14px] font-semibold tracking-[0.28em] text-[#C00000] uppercase hover:opacity-80"
+          >
             EXPORT DATA
-          </div>
+          </button>
           <button
             type="button"
             onClick={() => {

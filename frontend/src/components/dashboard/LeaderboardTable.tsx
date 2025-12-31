@@ -179,9 +179,11 @@ function HeaderCell({
       <span className="text-[11px] font-extrabold tracking-[0.22em] uppercase text-[#F7E37A]">
         {label}
       </span>
+      {sortKey && (
       <span className="ml-2 opacity-90">
         <SortIcon active={!!isActive} order={order ?? "asc"} />
       </span>
+      )}
     </>
   );
 
