@@ -5,8 +5,8 @@ import TopScoreboard from "./TopScoreboard";
 import FilterSidebar from "./FilterSidebar";
 import LeaderboardTable from "./LeaderboardTable";
 import RightPanel from "./RightPanel";
-import { mockPlayers } from "@/lib/mockData";
-import { apiGet, getToken } from "@/lib/api";
+import { apiDelete, apiGet, apiPost, apiPut, getToken } from "@/lib/api";
+import PlayerModal, { PlayerFormValues } from "./PlayerModal";
 
 export type SortKey = "season_rank" | "game_rank" | "first_name" | "last_name" | 'jersey_number' | 'age' | 'position' | 'height_in' | 'weight_lb' | 'experience_years' | 'college';
 export type SortOrder = "asc" | "desc";
@@ -86,6 +86,25 @@ function mapRow(r: LeaderboardApiRow, idx: number): UiPlayerRow {
   };
 }
 
+function toNullOrNumber(v: number | ""): number | null {
+  return v === "" ? null : Number(v);
+}
+
+function toPlayerPayload(values: PlayerFormValues) {
+  return {
+    first_name: values.first_name.trim(),
+    last_name: values.last_name.trim(),
+    jersey_number: Number(values.jersey_number),
+    position: values.position?.trim() || null,
+    status: values.status,
+    height_in: toNullOrNumber(values.height_in),
+    weight_lb: toNullOrNumber(values.weight_lb),
+    age: toNullOrNumber(values.age),
+    experience_years: toNullOrNumber(values.experience_years),
+    college: values.college?.trim() || null,
+  };
+}
+
 export default function DashboardPage() {
 
   const [rows, setRows] = useState<UiPlayerRow[]>([]);
@@ -97,7 +116,10 @@ export default function DashboardPage() {
   const [limit, setLimit] = useState<number>(20);
   const [sort, setSort] = useState<SortKey>("season_rank");
   const [order, setOrder] = useState<SortOrder>("asc");
-
+  const [modalOpen, setModalOpen] = useState<boolean>(false);
+  const [modalMode, setModalMode] = useState<"create" | "edit">("create");
+  const [deleteOpen, setDeleteOpen] = useState<boolean>(false);
+  const [refreshKey, setRefreshKey] = useState<number>(0);
 
   const [selectedId, setSelectedId] = useState<number | null>(null);
 
@@ -161,7 +183,7 @@ export default function DashboardPage() {
       cancelled = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [season, limit, page, sort, order, debouncedSearch]);
+  }, [season, limit, page, sort, order, debouncedSearch, refreshKey]);
 
   const selected = useMemo(
     () => rows.find((p) => p.id === selectedId) ?? rows[0],
@@ -177,6 +199,21 @@ export default function DashboardPage() {
     setSort(next);
   }
 
+  const handlePlayerSubmit = async (values: PlayerFormValues) => {
+  const token = await getToken();
+  const payload = toPlayerPayload(values);
+
+  if (modalMode === "create") {
+    await apiPost("/players", token, payload);
+    setPage(1);
+  } else {
+    if (!selectedId) return;
+    await apiPut(`/players/${selectedId}`, token, payload);
+  }
+
+  setModalOpen(false);
+  setRefreshKey((k) => k + 1);
+};
 
   return (
     <div className="min-h-screen w-full bg-white">
@@ -207,6 +244,45 @@ export default function DashboardPage() {
           <div className="text-[14px] font-semibold tracking-[0.28em] text-[#C00000] uppercase">
             EXPORT DATA
           </div>
+          <button
+            type="button"
+            onClick={() => {
+              setModalMode("create");
+              setModalOpen(true);
+            }}
+            className="ml-auto h-9 px-4 rounded-md bg-[#C00000] text-white text-sm font-extrabold tracking-[0.16em] uppercase"
+          >
+            ADD PLAYER
+          </button>
+          <button
+            type="button"
+            disabled={!selectedId}
+            onClick={() => {
+              if (!selectedId) return;
+              setModalMode("edit");
+              setModalOpen(true);
+            }}
+            className={`h-9 px-4 rounded-md text-sm font-extrabold tracking-[0.16em] uppercase ${
+              selectedId
+                ? "bg-[#B3995D] text-black hover:bg-[#A88C4F]"
+                : "bg-black/10 text-black/30"
+            }`}
+          >
+            EDIT PLAYER
+          </button>
+          <button
+            type="button"
+            disabled={!selectedId}
+            onClick={() => setDeleteOpen(true)}
+            className={`h-9 px-4 rounded-md text-sm font-extrabold tracking-[0.16em] uppercase ${
+              selectedId
+                ? "bg-black text-white hover:bg-black/85"
+                : "bg-black/10 text-black/30"
+            }`}
+          >
+            DELETE
+          </button>
+
         </div>
       </div>
 
@@ -266,7 +342,7 @@ export default function DashboardPage() {
                       className={`h-9 px-4 rounded-md border text-sm font-semibold ${
                         !canPrev || loading
                           ? "border-black/10 text-black/30"
-                          : "border-black/20 text-black/70 hover:bg-black/[0.03]"
+                          : "border-black/20 text-black/70 hover:bg-black/3"
                       }`}
                     >
                       Prev
@@ -289,7 +365,7 @@ export default function DashboardPage() {
                       className={`h-9 px-4 rounded-md border text-sm font-semibold ${
                         !canNext || loading
                           ? "border-black/10 text-black/30"
-                          : "border-black/20 text-black/70 hover:bg-black/[0.03]"
+                          : "border-black/20 text-black/70 hover:bg-black/3"
                       }`}
                     >
                       Next
@@ -310,6 +386,82 @@ export default function DashboardPage() {
             )}
       </aside>
       </div>
+      <PlayerModal
+        open={modalOpen}
+        mode={modalMode}
+        initial={modalMode === "edit" ? selected : null}
+        onClose={() => setModalOpen(false)}
+          onSubmit={handlePlayerSubmit}
+      />
+      {deleteOpen ? (
+        <div className="fixed inset-0 z-120">
+          <button
+            type="button"
+            className="absolute inset-0 bg-black/40"
+            onClick={() => setDeleteOpen(false)}
+            aria-label="Close delete dialog"
+          />
+          <div className="absolute left-1/2 top-1/2 w-130 -translate-x-1/2 -translate-y-1/2 rounded-2xl bg-white shadow-[0_24px_60px_rgba(0,0,0,0.35)] border border-black/10">
+            <div className="px-6 py-5 border-b border-black/10 flex items-center justify-between">
+              <div className="text-[13px] font-extrabold tracking-[0.28em] text-[#C00000]">
+                DELETE PLAYER
+              </div>
+              <button
+                type="button"
+                onClick={() => setDeleteOpen(false)}
+                className="h-9 w-9 rounded-md border border-black/15 hover:bg-black/3 flex items-center justify-center"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="px-6 py-5">
+              <div className="text-sm text-black/70">
+                This will permanently delete{" "}
+                <span className="font-semibold text-black">
+                  {selected?.firstName} {selected?.lastName}
+                </span>
+                {selected?.jersey ? (
+                  <>
+                    {" "}
+                    (<span className="font-semibold">#{selected.jersey}</span>)
+                  </>
+                ) : null}
+                . Continue?
+              </div>
+            </div>
+
+            <div className="px-6 py-5 border-t border-black/10 flex items-center justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => setDeleteOpen(false)}
+                className="h-10 px-5 rounded-md border border-black/15 text-sm font-semibold text-black/70 hover:bg-black/3"
+              >
+                CANCEL
+              </button>
+
+              <button
+                type="button"
+                onClick={async () => {
+                  if (!selectedId) return;
+                  const token = await getToken();
+                  await apiDelete(`/players/${selectedId}`, token);
+
+                  setDeleteOpen(false);
+                  setRefreshKey((k) => k + 1);
+
+                  setSelectedId(null);
+                }}
+                className="h-10 px-6 rounded-md bg-[#C00000] text-white text-sm font-extrabold tracking-[0.16em] uppercase hover:bg-[#A00000]"
+              >
+                DELETE
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+
     </div>
   );
 }

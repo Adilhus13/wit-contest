@@ -10,11 +10,17 @@ class Player extends Model
     use HasFactory;
 
     protected $fillable = [
-        'first_name',
-        'last_name',
-        'position',
-        'jersey_number',
-        'status'
+    'first_name',
+    'last_name',
+    'jersey_number',
+    'position',
+    'height_in',
+    'weight_lb',
+    'age',
+    'experience_years',
+    'college',
+    'status',
+    'headshot_url',
     ];
 
     public function stats(){

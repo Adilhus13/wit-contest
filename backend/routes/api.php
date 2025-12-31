@@ -13,5 +13,5 @@ Route::post('/auth/token', [AuthController::class, 'token'])->middleware('thrott
 Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
     Route::get('/leaderboard', [LeaderboardController::class, 'index']);
     Route::get('/games', [GameController::class, 'index']);
-    Route::apiResource('players', PlayerController::class);
+    Route::apiResource('/players', PlayerController::class);
 });

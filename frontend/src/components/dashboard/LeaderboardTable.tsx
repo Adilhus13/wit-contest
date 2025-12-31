@@ -122,7 +122,7 @@ export default function LeaderboardTable({
             <button
               key={r.id}
               type="button"
-              onClick={() => r.id === selectedId ? onSelect(null) : onSelect(r.id)} // ✅ no deselect-on-click
+              onClick={() => r.id === selectedId ? onSelect(null) : onSelect(r.id)}
               className={clsx(
                 "w-full text-left grid grid-cols-[98px_96px_56px_140px_140px_68px_62px_62px_68px_68px_220px_1fr] items-center",
                 "text-[13px] text-black/80",

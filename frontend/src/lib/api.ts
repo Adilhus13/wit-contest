@@ -20,6 +20,33 @@ export async function getToken(): Promise<string> {
   return json.token;
 }
 
+export async function request<T>(
+  method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE",
+  path: string,
+  token: string,
+  body?: unknown
+): Promise<T> {
+  const res = await fetch(`${baseUrl}${path}`, {
+    method,
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: body === undefined ? undefined : JSON.stringify(body),
+    cache: "no-store",
+  });
+
+  if(!res.ok) {
+    const text = await res.text();
+    throw new Error (`${method}${path} failed (${res.status}): ${text}`);
+  }
+
+  if (res.status === 204) return undefined as T
+
+  return (await res.json()) as T
+}
+
 export async function apiGet<T>(path: string, token: string): Promise<T> {
   const res = await fetch(`${baseUrl}${path}`, {
     headers: { Authorization: `Bearer ${token}` },
@@ -28,4 +55,16 @@ export async function apiGet<T>(path: string, token: string): Promise<T> {
 
   if (!res.ok) throw new Error(await res.text());
   return (await res.json()) as T;
+}
+
+export async function apiPost<T>(path: string, token: string, body: unknown): Promise<T> {
+  return request<T>("POST", path, token, body);
+}
+
+export async function apiPut<T>(path: string, token: string, body: unknown): Promise<T> {
+  return request<T>("PUT", path, token, body);
+}
+
+export async function apiDelete<T>(path: string, token: string): Promise<T> {
+  return request<T>("DELETE", path, token)
 }
