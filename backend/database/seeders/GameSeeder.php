@@ -11,6 +11,20 @@ class GameSeeder extends Seeder
     {
         $count = (int) env('SEED_GAMES', 40);
 
+        $logoUrls = [
+            'https://drive.google.com/file/d/124cICjygtM0YUlbOPnEeIP0393MuNn5X/view?usp=sharing',
+            'https://drive.google.com/file/d/16kS7uQI3MdtqAEMrBRUOzEDoZt3u-Xeb/view?usp=sharing',
+            'https://drive.google.com/file/d/1E8zVGkvZrKfua4ZyWi5zSNx-v9UDsMdx/view?usp=sharing',
+            'https://drive.google.com/file/d/1JrifRGGFUaWO97DK1eAQZLWZjqp0732h/view?usp=sharing',
+            'https://drive.google.com/file/d/1TRb1hVp4UYH_WHp0aNJPUiuSPvnctue9/view?usp=sharing',
+            'https://drive.google.com/file/d/1X9fKqeZCuSRmMHpVis0MUcqgXQLqbTkF/view?usp=sharing',
+            'https://drive.google.com/file/d/1ikXaKvzPWZKWyM1xhnv3TFcvcnm5FSy1/view?usp=sharing',
+            'https://drive.google.com/file/d/1j61CiYT-2kzGcZJOAvk7qVerPDV-rDN1/view?usp=sharing',
+            'https://drive.google.com/file/d/1mdy6sXIAXMq_MaT20IfhZz0sOWUjD6gC/view?usp=sharing',
+            'https://drive.google.com/file/d/1yChvoTS8hjEZYJpbXASLzp3PAUy4CtH4/view?usp=sharing',
+            'https://drive.google.com/file/d/1yv_faknEZ6piBaxsPI8e_sgQAafb76pT/view?usp=sharing',
+        ];
+
         // City + Name so UI can render like the design
         $opponents = [
             ['city' => 'SEATTLE',      'name' => 'SEAHAWKS'],
@@ -53,12 +67,21 @@ class GameSeeder extends Seeder
             "AT&T Stadium",
             "Lincoln Financial Field",
             "Arrowhead Stadium",
-            null,
         ];
 
         $start = now()->subMonths(18);
 
+        $driveToDirect = function (string $url): string {
+            if (preg_match('~/d/([^/]+)/~', $url, $m)) {
+                $id = $m[1];
+                return "https://drive.google.com/thumbnail?id={$id}&sz=w256";
+            }
+            return $url;
+        };
+
+
         $rows = [];
+        $logosCount = count($logoUrls);
         for ($i = 0; $i < $count; $i++) {
             $sf = random_int(10, 45);
             $opp = random_int(6, 42);
@@ -67,6 +90,8 @@ class GameSeeder extends Seeder
             $location = random_int(0, 1) ? 'home' : 'away';
 
             $oppTeam = $opponents[array_rand($opponents)];
+
+            $logoUrl = $driveToDirect($logoUrls[$i % $logosCount]);
 
             $rows[] = [
                 'season' => (int) $date->format('Y'), // simple + consistent
@@ -91,6 +116,8 @@ class GameSeeder extends Seeder
                 // keep venue, but prefer stadium for the UI
                 'venue' => $stadiums[array_rand($stadiums)],
                 'stadium' => $location === 'home' ? "Levi's Stadium" : ($stadiums[array_rand($stadiums)] ?? null),
+
+                'logo_url' => $logoUrl,
 
                 'created_at' => now(),
                 'updated_at' => now(),

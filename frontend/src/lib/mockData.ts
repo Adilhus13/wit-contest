@@ -21,6 +21,7 @@ export type PlayerRow = {
   age: number;
   exp: number;
   college: string;
+  headshot_url?: string;
 };
 
 export const mockGames: GameCard[] = [

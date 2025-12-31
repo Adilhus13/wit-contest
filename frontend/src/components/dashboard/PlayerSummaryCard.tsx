@@ -1,10 +1,14 @@
-import type { PlayerRow } from "@/lib/mockData";
+import { UiPlayerRow } from "./DashboardPage";
 
-export default function PlayerSummaryCard({ player }: { player: PlayerRow }) {
+export default function PlayerSummaryCard({ player }: { player: UiPlayerRow }) {
   return (
     <div className="flex items-center gap-4">
       <div className="h-[74px] w-[74px] rounded-2xl bg-[linear-gradient(180deg,#C00000_0%,#6B0000_100%)] shadow-[0_14px_26px_rgba(0,0,0,0.22)] flex items-center justify-center text-[#F7E37A] font-extrabold">
-        49
+        <img
+          src={player.headshot_url}
+          alt={`${player.firstName} ${player.lastName}`}
+          className="h-[70px] w-[70px] rounded-2xl object-cover"
+        />
       </div>
 
       <div>

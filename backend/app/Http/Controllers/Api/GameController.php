@@ -32,6 +32,7 @@ class GameController extends Controller
                 'result',
                 'venue',
                 'stadium',
+                'logo_url'
             ])
             ->orderByDesc('game_date');
 
@@ -55,6 +56,7 @@ class GameController extends Controller
                 'result' => $result,
                 'score' => "{$g->sf_score}-{$g->opp_score}",
                 'location' => $g->location,
+                'logo_url' => $g->logo_url,
             ];
         });
 

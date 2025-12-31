@@ -10,6 +10,7 @@ type GameDto = {
   opponentName: string | null;
   result: "W" | "L";
   score: string;
+  logo_url: string;
 };
 
 
@@ -25,7 +26,6 @@ export default function TopScoreboard() {
    (async () => {
     try {
       const token = await getToken();
-      console.log("TOKENNNNN: ", token)
       const res = await apiGet<{data: GameDto[] }>(`/games?limit=12`, token)
       if(!cancelled) setGames(res.data);
     }catch (e) {
@@ -82,8 +82,8 @@ export default function TopScoreboard() {
                   </div>
                 </div>
 
-                {/* logo spacer to match screenshot proportions */}
-                <div className="h-14" />
+                
+                <div className="flex w-full align-center justify-center"><img src={g.logo_url} /></div>
 
                 <div>
                   <div className="text-[12px] font-semibold text-black/70 uppercase">VS</div>

@@ -34,6 +34,16 @@ class PlayerSeeder extends Seeder
             }
         }
 
+        $driveToDirect = function (string $url): string {
+            if (preg_match('~/d/([^/]+)/~', $url, $m)) {
+                $id = $m[1];
+                return "https://drive.google.com/thumbnail?id={$id}&sz=w256";
+            }
+            return $url;
+        };
+
+        $headshot_url = $driveToDirect("https://drive.google.com/file/d/1JhjHFL5CwTZmQ9vTZOxBpFEt_p2DNHqf/view?usp=drive_link");
+
         foreach ($lines as $line) {
             if ($line === '') continue;
 
@@ -54,6 +64,7 @@ class PlayerSeeder extends Seeder
                     'experience_years' => ($row['experience_years'] ?? '') !== '' ? (int) $row['experience_years'] : null,
 
                     'college' => isset($row['college']) && trim($row['college']) !== '' ? trim($row['college']) : null,
+                    'headshot_url' => $headshot_url,
                 ]
             );
         }

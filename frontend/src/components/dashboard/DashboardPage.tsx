@@ -26,6 +26,7 @@ type LeaderboardApiRow = {
   age?: number | null;
   experience_years?: number | null;
   college?: string | null;
+  headshot_url?: string;
 };
 
 type LeaderboardResponse = {
@@ -34,7 +35,7 @@ type LeaderboardResponse = {
   meta: PaginatorMeta;
 };
 
-type UiPlayerRow = {
+export type UiPlayerRow = {
   id: number;
   seasonRank: number;
   gameRank: number;
@@ -47,6 +48,7 @@ type UiPlayerRow = {
   age: number;
   exp: number;
   college: string;
+  headshot_url?: string;
 };
 
 type PaginatorMeta = {
@@ -83,6 +85,8 @@ function mapRow(r: LeaderboardApiRow, idx: number): UiPlayerRow {
     age: Number(r.age ?? 0),
     exp: Number(r.experience_years ?? 0),
     college: r.college ?? "",
+    headshot_url: r.headshot_url ?? "",
+
   };
 }
 
