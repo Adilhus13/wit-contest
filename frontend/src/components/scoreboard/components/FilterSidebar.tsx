@@ -1,7 +1,6 @@
-export default function FilterSidebar() {
+export const FilterSidebar = () => {
   return (
     <aside className="w-[300px] relative overflow-hidden bg-[linear-gradient(180deg,#C00000_0%,#6B0000_85%)] px-7 py-10">
-      {/* diagonal shine line like screenshot */}
       <div className="pointer-events-none absolute -left-24 top-16 h-[2px] w-[520px] rotate-[-16deg] bg-white/20" />
 
       <div className="text-white font-extrabold tracking-[0.22em] text-[11px] uppercase">

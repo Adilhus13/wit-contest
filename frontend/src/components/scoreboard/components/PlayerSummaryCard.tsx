@@ -1,4 +1,4 @@
-import { UiPlayerRow } from "./DashboardPage";
+import { UiPlayerRow } from "../types";
 
 export default function PlayerSummaryCard({ player }: { player: UiPlayerRow }) {
   return (

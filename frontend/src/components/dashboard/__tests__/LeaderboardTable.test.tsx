@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import LeaderboardTable, { LeaderboardRow } from '../LeaderboardTable';
+import LeaderboardTable, { LeaderboardRow } from '../../scoreboard/components/LeaderboardTable';
 
 const rows: LeaderboardRow[] = [
   {

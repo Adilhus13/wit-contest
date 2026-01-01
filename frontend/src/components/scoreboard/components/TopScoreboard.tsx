@@ -1,4 +1,4 @@
-import { apiGet, getToken } from "@/lib/api";
+import { apiGet, getToken } from "@/components/scoreboard/api";
 import { useEffect, useState } from "react";
 
 type GameDto = {

@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import PlayerSummaryCard from '../PlayerSummaryCard';
+import PlayerSummaryCard from '../../scoreboard/components/PlayerSummaryCard';
 
 const player = {
   id: 1,

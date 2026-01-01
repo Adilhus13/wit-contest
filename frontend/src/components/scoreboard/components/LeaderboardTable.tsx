@@ -1,7 +1,7 @@
 "use client";
 
 import clsx from "clsx";
-import { SortKey, SortOrder } from "./DashboardPage";
+import { SortKey, SortOrder } from "../types";
 
 export type LeaderboardRow = {
   id: number;

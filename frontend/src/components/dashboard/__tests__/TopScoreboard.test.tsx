@@ -1,13 +1,13 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
-import TopScoreboard from '../TopScoreboard';
+import TopScoreboard from '../../scoreboard/components/TopScoreboard';
 
 jest.mock('@/lib/api', () => ({
   apiGet: jest.fn(),
   getToken: jest.fn(),
 }));
 
-import { apiGet, getToken } from '@/lib/api';
+import { apiGet, getToken } from '@/components/scoreboard/api';
 
 test('fetches and displays games', async () => {
   (getToken as jest.Mock).mockResolvedValue('token-123');
