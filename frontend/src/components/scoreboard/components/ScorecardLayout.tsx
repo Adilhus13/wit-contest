@@ -18,7 +18,6 @@ export const ScoreboardLayout = ({ hero, top, sidebar, right, children }: Props)
         {sidebar}
         <main className="flex-1 bg-white">{children}</main>
 
-        {/* keep current behavior for now */}
         {right ? <aside className="w-110 shrink-0 fixed right-12 bottom-12">{right}</aside> : null}
       </div>
     </div>

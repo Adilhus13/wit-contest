@@ -22,7 +22,6 @@ export default function TopScoreboard() {
   useEffect(() => {
    let cancelled = false;
    
-   
    (async () => {
     try {
       const token = await getToken();

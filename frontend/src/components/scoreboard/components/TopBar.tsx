@@ -1,28 +1,29 @@
 import React from "react";
 
-type Props = {
+type TopBarProps = {
   search: string;
-  onSearchChange: (value: string) => void;
-
-  canEdit: boolean;
-  canDelete: boolean;
-
-  onExport: () => void;
-  onAdd: () => void;
-  onEdit: () => void;
-  onDelete: () => void;
+  onSearchChange: (v: string) => void;
+  actions: {
+    onExport: () => void;
+    onAdd: () => void;
+    onEdit: () => void;
+    onDelete: () => void;
+    canEdit: boolean;
+    canDelete: boolean;
+  };
 };
 
 export const TopBar = ({
   search,
   onSearchChange,
-  canEdit,
+  actions:{
+    canEdit,
   canDelete,
   onExport,
   onAdd,
   onEdit,
-  onDelete,
-}: Props) => {
+  onDelete,}
+}: TopBarProps) => {
   return (
     <div className="bg-white border-b border-black/10">
       <div className="px-6 py-4 relative flex items-center gap-4">

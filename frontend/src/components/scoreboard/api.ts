@@ -1,10 +1,13 @@
+import { downloadBlob } from "@/lib/download";
+
 const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+
 
 if (!baseUrl) throw new Error("NEXT_PUBLIC_API_BASE_URL missing");
 
 type TokenResponse = { token: string; token_type: string };
 
-export async function getToken(): Promise<string> {
+export const getToken = async (): Promise<string> => {
   const email = process.env.NEXT_PUBLIC_API_EMAIL!;
   const password = process.env.NEXT_PUBLIC_API_PASSWORD!;
 
@@ -20,12 +23,12 @@ export async function getToken(): Promise<string> {
   return json.token;
 }
 
-export async function request<T>(
+export const request = async <T>(
   method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE",
   path: string,
   token: string,
   body?: unknown
-): Promise<T> {
+): Promise<T> => {
   const res = await fetch(`${baseUrl}${path}`, {
     method,
     headers: {
@@ -47,7 +50,7 @@ export async function request<T>(
   return (await res.json()) as T
 }
 
-export async function apiGet<T>(path: string, token: string): Promise<T> {
+export const apiGet = async <T>(path: string, token: string): Promise<T> => {
   const res = await fetch(`${baseUrl}${path}`, {
     headers: { Authorization: `Bearer ${token}` },
     cache: "no-store",
@@ -57,14 +60,46 @@ export async function apiGet<T>(path: string, token: string): Promise<T> {
   return (await res.json()) as T;
 }
 
-export async function apiPost<T>(path: string, token: string, body: unknown): Promise<T> {
-  return request<T>("POST", path, token, body);
-}
+export const apiPost = async <T>(path: string, token: string, body: unknown): Promise<T> =>
+  request<T>("POST", path, token, body);
 
-export async function apiPut<T>(path: string, token: string, body: unknown): Promise<T> {
-  return request<T>("PUT", path, token, body);
-}
+export const apiPut = async <T>(path: string, token: string, body: unknown): Promise<T> =>
+  request<T>("PUT", path, token, body);
 
-export async function apiDelete<T>(path: string, token: string): Promise<T> {
-  return request<T>("DELETE", path, token)
-}
+export const apiDelete = async <T>(path: string, token: string): Promise<T> =>
+  request<T>("DELETE", path, token);
+
+
+export const exportLeaderboardCsv = async (params: {
+  season: number;
+  sort: string;
+  order: string;
+  search?: string;
+}) => {
+  const token = await getToken();
+
+  const qs = new URLSearchParams({
+    season: String(params.season),
+    sort: params.sort,
+    order: params.order,
+  });
+
+  if (params.search) qs.set("search", params.search);
+
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_API_BASE_URL}/leaderboard/export?${qs.toString()}`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "text/csv",
+      },
+    }
+  );
+
+  if (!res.ok) {
+    throw new Error(`Export failed (${res.status})`);
+  }
+
+  const blob = await res.blob();
+  downloadBlob(blob, `49ers_leaderboard_${params.season}.csv`);
+};
