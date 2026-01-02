@@ -1,4 +1,3 @@
-"use client";
 import clsx from "clsx";
 import { LeaderboardRow, SortKey, SortOrder } from "../../types";
 import { HeaderCell } from "./HeaderCell";
@@ -25,22 +24,22 @@ export const LeaderboardTable = ({
   onSortChange,
 }: LeaderboardTableProps) => {
 
-const handleRowClick = useCallback(
-  (id: number) => onSelect(id === selectedId ? null : id),
-  [onSelect, selectedId]
-);
+  const handleRowClick = useCallback(
+    (id: number) => onSelect(id === selectedId ? null : id),
+    [onSelect, selectedId]
+  );
 
-const parentRef = useRef<HTMLDivElement | null>(null);
+  const parentRef = useRef<HTMLDivElement | null>(null);
 
-const rowVirtualizer = useVirtualizer({
-  count: rows.length,
-  getScrollElement: () => parentRef.current,
-  estimateSize: () => 56, // row height (adjust if needed)
-  overscan: 10,
-});
+  const rowVirtualizer = useVirtualizer({
+    count: rows.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => 56,
+    overscan: 10,
+  });
 
-const virtualRows = rowVirtualizer.getVirtualItems();
-const totalSize = rowVirtualizer.getTotalSize();
+  const virtualRows = rowVirtualizer.getVirtualItems();
+  const totalSize = rowVirtualizer.getTotalSize();
 
   return (
     <div className="border border-[#C00000]/70">
@@ -61,96 +60,58 @@ const totalSize = rowVirtualizer.getTotalSize();
         )}
         <div className="h-14" />
       </div>
-<div
-  ref={parentRef}
-  className="bg-white h-full max-h-screen overflow-y-auto"
->
-  <div style={{ height: totalSize, position: "relative" }}>
-    {virtualRows.map((vr) => {
-      const r = rows[vr.index];
-      const selected = selectedId !== null && r.id === selectedId;
+      <div
+        ref={parentRef}
+        className="bg-white h-full max-h-screen overflow-y-auto"
+      >
+        <div style={{ height: totalSize, position: "relative" }}>
+          {virtualRows.map((vr) => {
+            const r = rows[vr.index];
+            const selected = selectedId !== null && r.id === selectedId;
 
-      return (
-        <button
-          key={r.id}
-          type="button"
-          aria-selected={selected}
-          onClick={() => onSelect(r.id === selectedId ? null : r.id)}
-          className={clsx(
-            "w-full text-left grid grid-cols-[98px_96px_56px_140px_140px_68px_62px_62px_68px_68px_220px_1fr] items-center",
-            "text-[13px] text-black/80",
-            "border-t border-black/10",
-            selected && "bg-[#F6E6E6] border-y-2 border-[#C00000]"
-          )}
-          style={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            width: "100%",
-            transform: `translateY(${vr.start}px)`,
-          }}
-        >
-          {/* your cells exactly as before */}
-          <div className="h-full py-4 flex items-center justify-center font-extrabold bg-[#4A4A4A] text-[#F7E37A]">
-            {r.seasonRank}
-          </div>
-          <div className="py-4 flex items-center justify-center font-extrabold text-black">
-            {r.gameRank}
-          </div>
-          <div className="py-4 flex items-center justify-center">{r.jersey}</div>
-          <div className="py-4 px-4">{r.firstName}</div>
-          <div className="py-4 px-4">{r.lastName}</div>
-          <div className="py-4 flex items-center justify-center">{r.pos}</div>
-          <div className="py-4 flex items-center justify-center">{r.ht}</div>
-          <div className="py-4 flex items-center justify-center">{r.wt}</div>
-          <div className="py-4 flex items-center justify-center">{r.age}</div>
-          <div className="py-4 flex items-center justify-center">{r.exp}</div>
-          <div className="py-4 px-4">{r.college}</div>
-          <div className="py-4" />
-        </button>
-      );
-    })}
-  </div>
-</div>
+            return (
+              <button
+                key={r.id}
+                type="button"
+                aria-selected={selected}
+                onClick={() => handleRowClick(r.id)}
+                className={clsx(
+                  "w-full text-left grid grid-cols-[98px_96px_56px_140px_140px_68px_62px_62px_68px_68px_220px_1fr] items-center",
+                  "text-[13px] text-black/80",
+                  "border-t border-black/10",
+                  selected && "bg-[#F6E6E6] border-y-2 border-[#C00000]"
+                )}
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  width: "100%",
+                  transform: `translateY(${vr.start}px)`,
+                }}
+              >
+                {/* your cells exactly as before */}
+                <div className="h-full py-4 flex items-center justify-center font-extrabold bg-[#4A4A4A] text-[#F7E37A]">
+                  {r.seasonRank}
+                </div>
+                <div className="py-4 flex items-center justify-center font-extrabold text-black">
+                  {r.gameRank}
+                </div>
+                <div className="py-4 flex items-center justify-center">{r.jersey}</div>
+                <div className="py-4 px-4">{r.firstName}</div>
+                <div className="py-4 px-4">{r.lastName}</div>
+                <div className="py-4 flex items-center justify-center">{r.pos}</div>
+                <div className="py-4 flex items-center justify-center">{r.ht}</div>
+                <div className="py-4 flex items-center justify-center">{r.wt}</div>
+                <div className="py-4 flex items-center justify-center">{r.age}</div>
+                <div className="py-4 flex items-center justify-center">{r.exp}</div>
+                <div className="py-4 px-4">{r.college}</div>
+                <div className="py-4" />
+              </button>
+            );
+          })}
+        </div>
+      </div>
 
-      {/* <div className="bg-white h-full max-h-screen overflow-y-scroll">
-        {rows.map((r) => {
-          const selected = selectedId !== null && r.id === selectedId;
-
-          return (
-            <button
-              role="row"
-              aria-selected={selected}
-              key={r.id}
-              type="button"
-              onClick={() => handleRowClick(r.id)}
-              className={clsx(
-                "w-full text-left grid grid-cols-[98px_96px_56px_140px_140px_68px_62px_62px_68px_68px_220px_1fr] items-center",
-                "text-[13px] text-black/80",
-                "border-t border-black/10",
-                selected && "bg-[#F6E6E6] border-y-2 border-[#C00000]"
-              )}
-            >
-              <div className="h-full py-4 flex items-center justify-center font-extrabold bg-[#4A4A4A] text-[#F7E37A]">
-                {r.seasonRank}
-              </div>
-              <div className="py-4 flex items-center justify-center font-extrabold text-black">
-                {r.gameRank}
-              </div>
-              <div className="py-4 flex items-center justify-center">{r.jersey}</div>
-              <div className="py-4 px-4">{r.firstName}</div>
-              <div className="py-4 px-4">{r.lastName}</div>
-              <div className="py-4 flex items-center justify-center">{r.pos}</div>
-              <div className="py-4 flex items-center justify-center">{r.ht}</div>
-              <div className="py-4 flex items-center justify-center">{r.wt}</div>
-              <div className="py-4 flex items-center justify-center">{r.age}</div>
-              <div className="py-4 flex items-center justify-center">{r.exp}</div>
-              <div className="py-4 px-4">{r.college}</div>
-              <div className="py-4" />
-            </button>
-          );
-        })}
-      </div> */}
     </div>
   );
 }

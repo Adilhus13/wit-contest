@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import type { LeaderboardResponse, PaginatorMeta, SortKey, SortOrder, UIPlayerRow } from "../types";
-import { apiGet, getToken } from "../api"; // adjust path
+import { apiGet } from "../api";
 import { mapRow } from "../mappers";
 
 type Params = {

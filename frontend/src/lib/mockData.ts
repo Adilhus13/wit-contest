@@ -57,8 +57,7 @@ export const mockWeeklyBars: { week: string; value: number }[] = [
   { week: "WK 16", value: 49 },
 ];
 
-// deterministic PRNG (same output on server + client)
-function mulberry32(seed: number) {
+const mulberry32 = (seed: number) => {
   return function () {
     let t = (seed += 0x6d2b79f5);
     t = Math.imul(t ^ (t >>> 15), t | 1);

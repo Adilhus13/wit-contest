@@ -43,7 +43,7 @@ class PlayerSeeder extends Seeder
         };
 
         $headshot_url = $driveToDirect("https://drive.google.com/file/d/1JhjHFL5CwTZmQ9vTZOxBpFEt_p2DNHqf/view?usp=drive_link");
-
+ 
         foreach ($lines as $line) {
             if ($line === '') continue;
 

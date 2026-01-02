@@ -36,8 +36,6 @@ export default function DashboardPage() {
   const limit = Number(sp.get("limit") ?? 20);
 
   const [searchInput, setSearchInput] = useState<string>(search);
-  // const [sort, setSort] = useState<SortKey>("season_rank");
-  // const [order, setOrder] = useState<SortOrder>("asc");
   const [modalOpen, setModalOpen] = useState<boolean>(false);
   const [modalMode, setModalMode] = useState<ModalMode>("create");
   const [deleteOpen, setDeleteOpen] = useState<boolean>(false);
@@ -162,13 +160,8 @@ export default function DashboardPage() {
         onLimitChange={(newLimit) => setParams({ limit: String(newLimit), page: "1" })}
         loading={loading}
         meta={meta}
-        // page={page}
         canPrev={canPrev}
         canNext={canNext}
-        // onPrev={onPrev}
-        // onNext={onNext}
-        // onLimitChange={onLimitChange}
-        // limit={limit}
         currentCount={rows.length}
       />
 

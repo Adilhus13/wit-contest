@@ -1,4 +1,4 @@
-import { apiGet, getToken } from "@/components/scoreboard/api";
+import { apiGet } from "@/components/scoreboard/api";
 import { useEffect, useState } from "react";
 import { GameDto } from "../../types";
 import { GameCard } from "./GameCard";
@@ -10,8 +10,7 @@ export const TopScoreboard = () => {
   
   useEffect(() => {
     const getGamesList = async () => {
-      const token = await getToken();
-      const res = await apiGet<{ data: GameDto[] }>(`/games?limit=${GAMES_LIMIT}`, token)
+      const res = await apiGet<{ data: GameDto[] }>(`/games?limit=${GAMES_LIMIT}`)
       setGames(res.data);
     }
     getGamesList()
