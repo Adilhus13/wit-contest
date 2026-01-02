@@ -15,9 +15,18 @@ type Params = {
 };
 
 export const useLeaderboard = ({ season, limit, page, sort, order,  debouncedSearch }: Params) => {
-  
+   /**
+   * TanStack Query client lets us manually invalidate cached queries
+   * after mutations (create/update/delete) so the leaderboard refetches.
+   */
   const queryClient = useQueryClient();
 
+  /**
+   * CREATE
+   * - Sends POST /players
+   * - On success, invalidate the leaderboard query so UI refreshes with new player.
+   * - Uses mutateAsync so callers can await the operation and close modals, etc.
+   */
   const {
     mutateAsync: createPlayer,
     isPending: createLoading,
@@ -36,6 +45,12 @@ export const useLeaderboard = ({ season, limit, page, sort, order,  debouncedSea
       });
     },
   });
+
+  /**
+   * UPDATE
+   * - Sends PUT /players/:id
+   * - On success, invalidate the leaderboard query so UI reflects changes.
+   */
 
   const {
     mutateAsync: updatePlayer,
@@ -56,6 +71,12 @@ export const useLeaderboard = ({ season, limit, page, sort, order,  debouncedSea
     },
   });
 
+  /**
+   * DELETE
+   * - Sends DELETE /players/:id
+   * - On success, invalidate the leaderboard query so UI removes the player.
+   */
+
   const {
     mutateAsync: deletePlayer,
     isPending: deleteLoading,
@@ -74,7 +95,13 @@ export const useLeaderboard = ({ season, limit, page, sort, order,  debouncedSea
       });
     },
   });
-  
+
+  /**
+   * READ (Leaderboard Query)
+   * - Query key includes pagination + sorting + search so caching works correctly
+   *   and each combination is treated as a separate cached result.
+   * - debouncedSearch avoids refetching on every keystroke.
+   */
   const { data: leaderboardData, isLoading: leaderboardLoading } = useQuery({
     queryKey: ["leaderboard", { season, limit, page, sort, order, debouncedSearch }],
     queryFn: async () => {

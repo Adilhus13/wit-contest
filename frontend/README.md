@@ -21,21 +21,50 @@ A modern Next.js application for displaying San Francisco 49ers player statistic
 
 ```
 frontend/
-├── src/
-│   ├── app/              # Next.js app directory
-│   │   ├── layout.tsx    # Root layout
-│   │   ├── page.tsx      # Home page
-│   │   └── globals.css   # Global styles
-│   ├── components/       # Reusable components
-│   │   └── dashboard/    # Dashboard components
-│   ├── lib/              # Utilities and helpers
-│   │   ├── api.ts        # API client
-│   │   └── mockData.ts   # Mock data
-│   └── styles/           # Styling
-├── public/               # Static assets
-├── jest.config.js        # Jest configuration
-├── tsconfig.json         # TypeScript configuration
-└── tailwind.config.ts    # Tailwind configuration
+├── .next/
+├── node_modules/
+├── public/
+└── src/
+    ├── app/       
+    ├── components/
+    │   └── scoreboard/
+    │       ├── __tests__/
+    │       │   ├── Mappers.test.tsx
+    │       │   └── ScoreboardPage.test.tsx
+    │       ├── components/
+    │       │   ├── cards/
+    │       │   │   ├── __tests__/
+    │       │   │   ├── GameCard.tsx
+    │       │   │   ├── PlayerSummaryCard.tsx
+    │       │   │   ├── RankingChartCard.tsx
+    │       │   │   ├── RightPanel.tsx
+    │       │   │   └── TopScoreboard.tsx
+    │       │   ├── common/
+    │       │   │   ├── Spinner.tsx
+    │       │   │   └── Toast.tsx
+    │       │   ├── layout/
+    │       │   │   ├── __tests__/
+    │       │   │   ├── FilterSidebar.tsx
+    │       │   │   ├── ScorecardLayout.tsx
+    │       │   │   └── TopBar.tsx
+    │       │   ├── modals/
+    │       │   │   ├── CreateEditPlayerModal.tsx
+    │       │   │   └── DeletePlayerModal.tsx
+    │       │   └── table/
+    │       │       ├── __tests__/
+    │       │       ├── columns.tsx
+    │       │       ├── HeaderCell.tsx
+    │       │       ├── LeaderboardTable.tsx
+    │       │       └── PaginationBar.tsx
+    │       ├── hooks/
+    │       │   ├── useDebouncedValue.tsx
+    │       │   └── useLeaderboard.tsx
+    │       ├── api.ts
+    │       ├── mappers.ts
+    │       ├── ScorecardPage.tsx
+    │       └── types.ts
+    ├── lib/
+    └── env.local
 ```
 
 ## Setup Instructions
@@ -104,7 +133,7 @@ Starts the production server. Run `npm run build` first.
 ### Testing
 
 ```bash
-npm test
+npm run test
 ```
 
 Runs the Jest test suite.

@@ -4,7 +4,6 @@ import "@testing-library/jest-dom";
 import userEvent from "@testing-library/user-event";
 import { PaginationBar } from "../PaginationBar";
 
-
 type PaginatorMeta = {
   from?: number | null;
   to?: number | null;

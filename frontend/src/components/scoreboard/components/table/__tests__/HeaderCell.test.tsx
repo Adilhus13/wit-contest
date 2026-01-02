@@ -2,8 +2,7 @@ import { render, screen } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import userEvent from "@testing-library/user-event";
 import { HeaderCell } from "../HeaderCell";
-
-type SortOrder = "asc" | "desc";
+import { SortOrder } from "@/components/scoreboard/types";
 
 describe("HeaderCell", () => {
   it("renders a non-sortable header as a div (no button) when sortKey is not provided", () => {

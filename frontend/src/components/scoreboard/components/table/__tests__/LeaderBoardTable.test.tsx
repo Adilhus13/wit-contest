@@ -1,9 +1,8 @@
-// LeaderboardTable.test.tsx
-import React from "react";
 import { render, screen } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import userEvent from "@testing-library/user-event";
 import { LeaderboardTable } from "../LeaderboardTable";
+import { SortKey, SortOrder } from "@/components/scoreboard/types";
 
 
 const headerCellSpy = jest.fn();
@@ -43,9 +42,6 @@ const useVirtualizerMock = jest.fn();
 jest.mock("@tanstack/react-virtual", () => ({
   useVirtualizer: (args: any) => useVirtualizerMock(args),
 }));
-
-type SortKey = "season_rank" | "first_name";
-type SortOrder = "asc" | "desc";
 
 const makeRows = () => [
   {
