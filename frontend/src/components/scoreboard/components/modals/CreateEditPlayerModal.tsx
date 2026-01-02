@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import clsx from "clsx";
 import { ModalMode, PlayerFormValues, UIPlayerRow } from "../../types";
 import { parseNum, toFormValues } from "../../mappers";
+import { Spinner } from "../common/Spinner";
 
 type CreateEditPlayerModalProps = {
   open: boolean;
@@ -9,9 +10,10 @@ type CreateEditPlayerModalProps = {
   initial?: UIPlayerRow | null;
   onClose: () => void;
   onSubmit: (values: PlayerFormValues) => void;
+  loading: boolean;
 };
 
-export const CreateEditPlayerModal = ({ open, mode, initial, onClose, onSubmit }: CreateEditPlayerModalProps) => {
+export const CreateEditPlayerModal = ({ open, mode, initial, onClose, onSubmit, loading }: CreateEditPlayerModalProps) => {
   const title = mode === "create" ? "CREATE PLAYER" : "EDIT PLAYER";
 
   const initialValues = useMemo(() => toFormValues(initial), [initial]);
@@ -27,9 +29,10 @@ export const CreateEditPlayerModal = ({ open, mode, initial, onClose, onSubmit }
 
   const errors = useMemo(() => {
     const e: Record<string, string> = {};
-    if (!values.first_name.trim()) e.first_name = "Required";
-    if (!values.last_name.trim()) e.last_name = "Required";
-    if (values.jersey_number === "" || values.jersey_number <= 0) e.jersey_number = "Required";
+    if (!values.firstName.trim()) e.firstName = "Required";
+    if (!values.lastName.trim()) e.lastName = "Required";
+    if (values.jerseyNumber === "" || values.jerseyNumber < 0) e.jerseyNumber = "Required";
+    if (values.heightIn as number > 99) e.heightIn = "Height must be less than 100";
     return e;
   }, [values]);
 
@@ -39,7 +42,6 @@ export const CreateEditPlayerModal = ({ open, mode, initial, onClose, onSubmit }
 
   return (
     <div className="fixed inset-0 z-100">
-      {/* backdrop */}
       <button
         type="button"
         onClick={onClose}
@@ -47,7 +49,6 @@ export const CreateEditPlayerModal = ({ open, mode, initial, onClose, onSubmit }
         aria-label="Close modal"
       />
 
-      {/* modal */}
       <div  role="dialog" aria-modal="true" aria-label="Edit player" className="absolute left-1/2 top-1/2 w-180 -translate-x-1/2 -translate-y-1/2 rounded-2xl bg-white shadow-[0_24px_60px_rgba(0,0,0,0.35)] border border-black/10">
         <div className="px-6 py-5 border-b border-black/10 flex items-center justify-between">
           <div className="text-[13px] font-extrabold tracking-[0.28em] text-[#C00000]">
@@ -65,43 +66,43 @@ export const CreateEditPlayerModal = ({ open, mode, initial, onClose, onSubmit }
           <div className="grid grid-cols-2 gap-4">
             <Field
               label="FIRST NAME"
-              error={touched.first_name ? errors.first_name : undefined}
+              error={touched.firstName ? errors.firstName : undefined}
             >
               <input
                 name='firstName'
-                value={values.first_name}
-                onChange={(e) => setValues((p) => ({ ...p, first_name: e.target.value }))}
-                onBlur={() => setTouched((p) => ({ ...p, first_name: true }))}
-                className={inputCls(!!(touched.first_name && errors.first_name))}
+                value={values.firstName}
+                onChange={(e) => setValues((p) => ({ ...p, firstName: e.target.value }))}
+                onBlur={() => setTouched((p) => ({ ...p, firstName: true }))}
+                className={inputCls(!!(touched.firstName && errors.firstName))}
               />
             </Field>
 
             <Field
               label="LAST NAME"
-              error={touched.last_name ? errors.last_name : undefined}
+              error={touched.lastName ? errors.lastName : undefined}
             >
               <input
                 name='lastName'
-                value={values.last_name}
-                onChange={(e) => setValues((p) => ({ ...p, last_name: e.target.value }))}
-                onBlur={() => setTouched((p) => ({ ...p, last_name: true }))}
-                className={inputCls(!!(touched.last_name && errors.last_name))}
+                value={values.lastName}
+                onChange={(e) => setValues((p) => ({ ...p, lastName: e.target.value }))}
+                onBlur={() => setTouched((p) => ({ ...p, lastName: true }))}
+                className={inputCls(!!(touched.lastName && errors.lastName))}
               />
             </Field>
 
             <Field
               label="JERSEY #"
-              error={touched.jersey_number ? errors.jersey_number : undefined}
+              error={touched.jerseyNumber ? errors.jerseyNumber : undefined}
             >
               <input
                 name='jerseyNumber'
                 inputMode="numeric"
-                value={values.jersey_number}
+                value={values.jerseyNumber}
                 onChange={(e) =>
-                  setValues((p) => ({ ...p, jersey_number: parseNum(e.target.value) }))
+                  setValues((p) => ({ ...p, jerseyNumber: parseNum(e.target.value) }))
                 }
-                onBlur={() => setTouched((p) => ({ ...p, jersey_number: true }))}
-                className={inputCls(!!(touched.jersey_number && errors.jersey_number))}
+                onBlur={() => setTouched((p) => ({ ...p, jerseyNumber: true }))}
+                className={inputCls(!!(touched.jerseyNumber && errors.jerseyNumber))}
               />
             </Field>
 
@@ -126,15 +127,20 @@ export const CreateEditPlayerModal = ({ open, mode, initial, onClose, onSubmit }
               </select>
             </Field>
 
-            <Field label="HEIGHT (IN)">
+            <Field 
+            label="HEIGHT (IN)"
+            error={touched.heightIn ? errors.heightIn : undefined}
+
+            >
               <input
                 name='height'
                 inputMode="numeric"
-                value={values.height_in}
+                value={values.heightIn}
                 onChange={(e) =>
-                  setValues((p) => ({ ...p, height_in: parseNum(e.target.value) }))
+                  setValues((p) => ({ ...p, heightIn: parseNum(e.target.value) }))
                 }
-                className={inputCls(false)}
+                onBlur={() => setTouched((p) => ({ ...p, heightIn: true }))}
+                className={inputCls(!!(touched.heightIn && errors.heightIn))}
               />
             </Field>
 
@@ -142,9 +148,9 @@ export const CreateEditPlayerModal = ({ open, mode, initial, onClose, onSubmit }
               <input
                 name='weight'
                 inputMode="numeric"
-                value={values.weight_lb}
+                value={values.weightLb}
                 onChange={(e) =>
-                  setValues((p) => ({ ...p, weight_lb: parseNum(e.target.value) }))
+                  setValues((p) => ({ ...p, weightLb: parseNum(e.target.value) }))
                 }
                 className={inputCls(false)}
               />
@@ -164,9 +170,9 @@ export const CreateEditPlayerModal = ({ open, mode, initial, onClose, onSubmit }
               <input
                 name='experienceYears'
                 inputMode="numeric"
-                value={values.experience_years}
+                value={values.experienceYears}
                 onChange={(e) =>
-                  setValues((p) => ({ ...p, experience_years: parseNum(e.target.value) }))
+                  setValues((p) => ({ ...p, experienceYears: parseNum(e.target.value) }))
                 }
                 className={inputCls(false)}
               />
@@ -187,31 +193,35 @@ export const CreateEditPlayerModal = ({ open, mode, initial, onClose, onSubmit }
           <button
             type="button"
             onClick={onClose}
-            className="h-10 px-5 rounded-md border border-black/15 text-sm font-semibold text-black/70 hover:bg-black/3"
+            className="h-10 px-5 w-23 rounded-md border border-black/15 text-sm font-semibold text-black/70 hover:bg-black/3"
           >
             CANCEL
           </button>
 
           <button
             type="button"
-            disabled={!canSubmit}
+            disabled={!canSubmit || loading}
             onClick={() => {
               setTouched({
-                first_name: true,
-                last_name: true,
-                jersey_number: true,
+                firstName: true,
+                lastName: true,
+                jerseyNumber: true,
               });
               if (!canSubmit) return;
               onSubmit(values);
             }}
             className={clsx(
-              "h-10 px-6 rounded-md text-sm font-extrabold tracking-[0.16em] uppercase",
+              "h-10 px-6 w-23 rounded-md text-sm font-extrabold tracking-[0.16em] uppercase",
               canSubmit
                 ? "bg-[#C00000] text-white hover:bg-[#A00000]"
                 : "bg-black/10 text-black/30"
             )}
           >
-            SAVE
+            { loading ? (
+              <Spinner size="md" />
+            ) : (
+              <p>SAVE</p>
+            )}
           </button>
         </div>
       </div>

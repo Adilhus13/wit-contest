@@ -5,6 +5,7 @@ import { columns } from "./columns";
 import { useCallback } from "react";
 import { useRef } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
+import { Spinner } from "../common/Spinner";
 
 type LeaderboardTableProps = {
   rows: LeaderboardRow[];
@@ -13,6 +14,7 @@ type LeaderboardTableProps = {
   sort: SortKey;
   order: SortOrder;
   onSortChange: (key: SortKey) => void;
+  loading?: boolean;
 };
 
 export const LeaderboardTable = ({
@@ -22,6 +24,7 @@ export const LeaderboardTable = ({
   sort,
   order,
   onSortChange,
+  loading,
 }: LeaderboardTableProps) => {
 
   const handleRowClick = useCallback(
@@ -43,7 +46,7 @@ export const LeaderboardTable = ({
 
   return (
     <div className="border border-[#C00000]/70">
-      <div className="grid grid-cols-[98px_96px_56px_140px_140px_68px_62px_62px_68px_68px_220px_1fr] bg-[linear-gradient(180deg,#6B0000_0%,#3E0000_100%)]">
+      <div className="grid grid-cols-[98px_96px_56px_140px_140px_68px_62px_62px_68px_68px_220px_1fr] bg-[linear-gradient(180deg,#6B0000_0%,#3E0000_100%)] font-['Open_sans',system-ui,sans-serif]">
         {columns.map((c) =>
           "sortKey" in c ? (
             <HeaderCell
@@ -64,21 +67,25 @@ export const LeaderboardTable = ({
         ref={parentRef}
         className="bg-white h-full max-h-screen overflow-y-auto"
       >
+        {loading && (
+        <div className="my-20 w-full flex items-center justify-center">
+          <Spinner size="md" label="Loading players" />
+        </div>
+        )}
         <div style={{ height: totalSize, position: "relative" }}>
           {virtualRows.map((vr) => {
             const r = rows[vr.index];
-            const selected = selectedId !== null && r.id === selectedId;
-
+            const selected = selectedId !== null && r.playerId === selectedId;
             return (
               <button
                 key={r.id}
                 type="button"
-                aria-selected={selected}
-                onClick={() => handleRowClick(r.id)}
+                onClick={() => handleRowClick(r.playerId)}
                 className={clsx(
                   "w-full text-left grid grid-cols-[98px_96px_56px_140px_140px_68px_62px_62px_68px_68px_220px_1fr] items-center",
                   "text-[13px] text-black/80",
                   "border-t border-black/10",
+                  "font-['Open_sans',system-ui,sans-serif]",
                   selected && "bg-[#F6E6E6] border-y-2 border-[#C00000]"
                 )}
                 style={{
@@ -89,7 +96,6 @@ export const LeaderboardTable = ({
                   transform: `translateY(${vr.start}px)`,
                 }}
               >
-                {/* your cells exactly as before */}
                 <div className="h-full py-4 flex items-center justify-center font-extrabold bg-[#4A4A4A] text-[#F7E37A]">
                   {r.seasonRank}
                 </div>

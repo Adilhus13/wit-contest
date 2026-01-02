@@ -1,4 +1,5 @@
 import type { UIPlayerRow } from "../../types";
+import { Spinner } from "../common/Spinner";
 
 type DeletePlayerModalProps = {
   open: boolean;
@@ -6,6 +7,7 @@ type DeletePlayerModalProps = {
   onClose: () => void;
   onConfirm: () => void | Promise<void>;
   confirmDisabled?: boolean;
+  loading: boolean;
 };
 
 export const DeletePlayerModal = ({
@@ -14,6 +16,7 @@ export const DeletePlayerModal = ({
   onClose,
   onConfirm,
   confirmDisabled,
+  loading
 }: DeletePlayerModalProps) => {
   if (!open) return null;
 
@@ -60,18 +63,22 @@ export const DeletePlayerModal = ({
           <button
             type="button"
             onClick={onClose}
-            className="h-10 px-5 rounded-md border border-black/15 text-sm font-semibold text-black/70 hover:bg-black/3"
+            className="h-10 px-5 w-28 rounded-md border border-black/15 text-sm font-semibold text-black/70 hover:bg-black/3"
           >
             CANCEL
           </button>
 
           <button
             type="button"
-            disabled={!!confirmDisabled}
+            disabled={!!confirmDisabled || loading }
             onClick={onConfirm}
-            className="h-10 px-6 rounded-md bg-[#C00000] text-white text-sm font-extrabold tracking-[0.16em] uppercase hover:bg-[#A00000] disabled:opacity-60 disabled:hover:bg-[#C00000]"
+            className="h-10 px-6 rounded-md w-28 bg-[#C00000] text-white text-sm font-extrabold tracking-[0.16em] uppercase hover:bg-[#A00000] disabled:opacity-60 disabled:hover:bg-[#C00000]"
           >
-            DELETE
+            { loading ? (
+              <Spinner size="md" />
+            ) : (
+              <p>DELETE</p>
+            )}
           </button>
         </div>
       </div>

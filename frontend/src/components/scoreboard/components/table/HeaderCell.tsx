@@ -27,7 +27,7 @@ export const HeaderCell = (props: HeaderCellProps) => {
   const { label } = props;
 
   const labelEl = (
-    <span className="text-[11px] font-extrabold tracking-[0.22em] uppercase text-[#F7E37A]">
+    <span className="text-[11px] font-bold tracking-[0.22em] uppercase text-[#FFFFFF]">
       {label}
     </span>
   );

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Game;
 use Illuminate\Http\Request;
+use Carbon\Carbon;
 
 class GameController extends Controller
 {
@@ -49,14 +50,14 @@ class GameController extends Controller
             return [
                 'id' => $g->id,
                 'season' => $g->season,
-                'date' => optional($g->game_date)->format('F j, Y'),
+                'date' => Carbon::parse($g->game_date)->format('F d,Y'),
                 'stadium' => $g->stadium ?? $g->venue,
                 'opponentCity' => $oppCity,
                 'opponentName' => $oppName,
                 'result' => $result,
                 'score' => "{$g->sf_score}-{$g->opp_score}",
                 'location' => $g->location,
-                'logo_url' => $g->logo_url,
+                'logoUrl' => $g->logo_url,
             ];
         });
 

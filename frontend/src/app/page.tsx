@@ -1,5 +1,5 @@
-import DashboardPage from "@/components/scoreboard/ScorecardPage";
+import ScorecardPage from "@/components/scoreboard/ScorecardPage";
 
 export default function Page() {
-  return <DashboardPage />;
+  return <ScorecardPage />;
 }

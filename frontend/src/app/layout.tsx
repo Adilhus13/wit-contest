@@ -1,6 +1,8 @@
+import { ToastProvider } from "@/components/scoreboard/components/common/Toast";
 import "./globals.css";
 import type { Metadata } from "next";
 import { Montserrat } from "next/font/google";
+import Providers from "./providers";
 
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -14,8 +16,13 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
-      <body className={montserrat.className}>{children}</body>
+    <html lang="en" className="no-scrollbar">
+      <body className={montserrat.className}>
+        <Providers>
+          <ToastProvider />
+          {children}
+        </Providers>
+        </body>
     </html>
   );
 }

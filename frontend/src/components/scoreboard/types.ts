@@ -3,20 +3,21 @@ export type SortOrder = "asc" | "desc";
 
 export type LeaderboardApiRow = {
   id: number;
-  season_rank?: number | null;
-  game_rank?: number | null;
+  playerId: number;
+  seasonRank?: number | null;
+  gameRank?: number | null;
 
-  jersey_number?: number | null;
-  first_name: string;
-  last_name: string;
+  jerseyNumber?: number | null;
+  firstName: string;
+  lastName: string;
 
   position?: string | null;
-  height_in?: number | null;
-  weight_lb?: number | null;
+  heightIn?: number | null;
+  weightLb?: number | null;
   age?: number | null;
-  experience_years?: number | null;
+  experienceYears?: number | null;
   college?: string | null;
-  headshot_url?: string;
+  headshotUrl?: string;
 };
 
 export type LeaderboardResponse = {
@@ -27,6 +28,7 @@ export type LeaderboardResponse = {
 
 export type UIPlayerRow = {
   id: number;
+  playerId: number;
   seasonRank: number;
   gameRank: number;
   jersey: number;
@@ -38,7 +40,7 @@ export type UIPlayerRow = {
   age: number;
   exp: number;
   college: string;
-  headshot_url?: string;
+  headshotUrl?: string;
 };
 
 export type PaginatorMeta = {
@@ -59,24 +61,26 @@ export type GameDto = {
   opponentName: string | null;
   result: "W" | "L";
   score: string;
-  logo_url: string;
+  logoUrl: string;
 };
 
 export type PlayerFormValues = {
-  first_name: string;
-  last_name: string;
-  jersey_number: number | "";
+  playerId: number;
+  firstName: string;
+  lastName: string;
+  jerseyNumber: number | "";
   position: string;
   status: "active" | "inactive";
-  height_in: number | "";
-  weight_lb: number | "";
+  heightIn: number | "";
+  weightLb: number | "";
   age: number | "";
-  experience_years: number | "";
+  experienceYears: number | "";
   college: string;
 };
 
 export type LeaderboardRow = {
   id: number;
+  playerId: number;
   seasonRank: number;
   gameRank: number;
   jersey: number;

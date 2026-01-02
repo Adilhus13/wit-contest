@@ -7,6 +7,7 @@ use App\Http\Requests\StorePlayerRequest;
 use App\Http\Requests\UpdatePlayerRequest;
 use App\Models\Player;
 use Illuminate\Http\Request;
+use App\Http\Resources\PlayerResource;
 
 class PlayerController extends Controller
 {
@@ -25,10 +26,10 @@ class PlayerController extends Controller
         $order = $data['order'] ?? 'asc';
 
         $sortMap = [
-            'last_name' => 'last_name',
-            'first_name' => 'first_name',
+            'lastName' => 'last_name',
+            'firstName' => 'first_name',
             'position' => 'position',
-            'jersey_number' => 'jersey_number',
+            'jerseyNumber' => 'jersey_number',
             'status' => 'status',
         ];
         $sortKey = $data['sort'] ?? 'last_name';
@@ -47,24 +48,24 @@ class PlayerController extends Controller
             ->orderBy($sortCol, $order)
             ->orderBy('id', 'asc');
 
-        return response()->json($q->paginate($limit));
+        return PlayerResource::collection($q->paginate($limit));
     }
 
     public function store(StorePlayerRequest $request)
     {
         $player = Player::query()->create($request->validated());
-        return response()->json($player, 201);
+        return (new PlayerResource($player))->response()->setStatusCode(201);
     }
 
     public function show(Player $player)
     {
-        return response()->json($player);
+        return new PlayerResource($player);
     }
 
     public function update(UpdatePlayerRequest $request, Player $player)
     {
         $player->update($request->validated());
-        return response()->json($player);
+        return new PlayerResource($player);
     }
 
     public function destroy(Player $player)

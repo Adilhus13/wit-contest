@@ -5,16 +5,17 @@ import { TopScoreboard } from "./components/cards/TopScoreboard";
 import { FilterSidebar } from "./components/layout/FilterSidebar";
 import { LeaderboardTable } from "./components/table/LeaderboardTable";
 import { RightPanel } from "./components/cards/RightPanel";
-import { apiDelete, apiPost, apiPut, exportLeaderboardCsv, getToken } from "@/components/scoreboard/api";
+import { apiDelete, apiGet, apiPost, apiPut, exportLeaderboardCsv, getToken } from "@/components/scoreboard/api";
 import { CreateEditPlayerModal } from "./components/modals/CreateEditPlayerModal";
 import type {
+  LeaderboardResponse,
   ModalMode,
   PlayerFormValues,
   SortKey,
   SortOrder,
 } from "./types";
 
-import { toPlayerPayload } from "./mappers"
+import { mapRow, toPlayerPayload } from "./mappers"
 import { TopBar } from "./components/layout/TopBar";
 import { DeletePlayerModal } from "./components/modals/DeletePlayerModal";
 import { ScoreboardLayout } from "./components/layout/ScorecardLayout";
@@ -23,10 +24,11 @@ import { usePagination } from "./hooks/usePagination";
 import { useLeaderboard } from "./hooks/useLeaderboard";
 import { useDebouncedValue } from "./hooks/useDebouncedValue";
 import { useRouter, useSearchParams } from "next/navigation";
+import { showToast } from "./components/common/Toast";
 
 const SEASON = 2023;
 
-export default function DashboardPage() {
+export default function ScorecardPage() {
   const router = useRouter();
   const sp = useSearchParams();
   const search = sp.get("search") ?? "";
@@ -41,18 +43,14 @@ export default function DashboardPage() {
   const [deleteOpen, setDeleteOpen] = useState<boolean>(false);
   const [selectedId, setSelectedId] = useState<number | null>(null);
 
-  const { setPage, onPrev, onNext, resetPage, onLimitChange, buildFlags } = usePagination({
-    initialLimit: 20,
-  });
   const debouncedSearch = useDebouncedValue(searchInput.trim(), 250);
-  const { rows, meta, loading, refetch } = useLeaderboard({
-    season: SEASON,
-    page,
-    limit,
-    sort,
-    order,
-    search: debouncedSearch,
-  });
+  const { createPlayer, createLoading, updatePlayer, updateLoading, deletePlayer, deleteLoading, leaderboardData, leaderboardLoading } = useLeaderboard({ season: SEASON, limit, page, sort, order, debouncedSearch: debouncedSearch });
+
+  const meta = leaderboardData?.meta ?? null;
+  const rows = useMemo(
+    () => (leaderboardData?.data ?? []).map(mapRow),
+    [leaderboardData]
+  );
 
   const setParams = (next: Record<string, string>, replace = false) => {
     const params = new URLSearchParams(window.location.search);
@@ -67,27 +65,36 @@ export default function DashboardPage() {
   };
 
   const handlePlayerSubmit = async (values: PlayerFormValues) => {
-    const payload = toPlayerPayload(values);
-
-    if (modalMode === "create") {
-      await apiPost("/players", payload);
-      setParams({ page: "1" });
-    } else {
-      if (!selectedId) return;
-      await apiPut(`/players/${selectedId}`, payload);
+    try {
+      const payload = toPlayerPayload(values);
+      if (modalMode === "create") {
+        await createPlayer(payload);
+        setModalOpen(false);
+        return;
+      }
+      if (!selectedId) {
+        showToast({ message: "No player selected", severity: "error" });
+        return;
+      }
+      await updatePlayer({ id: selectedId, payload });
+      setModalOpen(false);
+    } catch (e: any) {
+      console.log("Error: ", e?.message)
     }
-
-    setModalOpen(false);
-    await refetch();
   };
 
   const handleDelete = async () => {
-    if (!selectedId) return;
-    await apiDelete(`/players/${selectedId}`);
-
-    setDeleteOpen(false);
-    await refetch();
-    setSelectedId(null);
+    try {
+      if (!selectedId) return;
+      await deletePlayer(selectedId);
+      setSelectedId(null);
+      setDeleteOpen(false);
+    } catch (e) {
+      showToast({
+        message: "Error deleting the player.",
+        severity: "error"
+      })
+    }
   };
 
   const exportCsv = useCallback(
@@ -95,7 +102,7 @@ export default function DashboardPage() {
     [sort, order, debouncedSearch]
   );
 
-  const rowsById = useMemo(() => new Map(rows.map((r) => [r.id, r])), [rows]);
+  const rowsById = useMemo(() => new Map(rows.map((r) => [r.playerId, r])), [rows]);
 
   const selected = useMemo(() => {
     if (selectedId == null) return null;
@@ -107,7 +114,7 @@ export default function DashboardPage() {
   }, [search]);
 
   useEffect(() => {
-    if (debouncedSearch === search) return; // important guard
+    if (debouncedSearch === search) return;
     setParams({ search: debouncedSearch, page: "1" });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedSearch]);
@@ -122,8 +129,8 @@ export default function DashboardPage() {
   }, [rows]);
 
 
-  const canPrev = !loading && page > 1;
-  const canNext = !loading && (meta ? page < meta.last_page : rows.length === limit);
+  const canPrev = !leaderboardLoading && page > 1;
+  const canNext = !leaderboardLoading && (meta ? page < meta.last_page : rows.length === limit);
   return (
     <ScoreboardLayout
       hero={<TopScoreboard />}
@@ -151,6 +158,7 @@ export default function DashboardPage() {
         sort={sort}
         order={order}
         onSortChange={handleSortChange}
+        loading={leaderboardLoading}
       />
       <PaginationBar
         page={page}
@@ -158,20 +166,19 @@ export default function DashboardPage() {
         onPrev={() => setParams({ page: String(page - 1) })}
         onNext={() => setParams({ page: String(page + 1) })}
         onLimitChange={(newLimit) => setParams({ limit: String(newLimit), page: "1" })}
-        loading={loading}
+        loading={leaderboardLoading}
         meta={meta}
         canPrev={canPrev}
         canNext={canNext}
         currentCount={rows.length}
       />
-
-      {loading && <div className="mt-3 text-sm text-black/50">Loading leaderboard…</div>}
       <CreateEditPlayerModal
         open={modalOpen}
         mode={modalMode}
         initial={modalMode === "edit" ? selected : null}
         onClose={() => setModalOpen(false)}
         onSubmit={handlePlayerSubmit}
+        loading={modalMode === "edit" ? updateLoading : createLoading}
       />
       <DeletePlayerModal
         open={deleteOpen}
@@ -179,6 +186,7 @@ export default function DashboardPage() {
         onClose={() => setDeleteOpen(false)}
         onConfirm={handleDelete}
         confirmDisabled={!selectedId}
+        loading={deleteLoading}
       />
 
     </ScoreboardLayout>

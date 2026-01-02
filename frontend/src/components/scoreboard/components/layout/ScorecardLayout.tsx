@@ -10,7 +10,7 @@ type ScoreboardLayoutProps = {
 
 export const ScoreboardLayout = ({ hero, top, sidebar, right, children }: ScoreboardLayoutProps) => {
   return (
-    <div className="min-h-screen w-full bg-white">
+    <div className="max-h-screen w-full bg-white no-scrollbar">
       {hero ? <div className="h-120">{hero}</div> : null}
       {top}
 

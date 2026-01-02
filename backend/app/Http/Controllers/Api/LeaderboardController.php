@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use App\Http\Resources\LeaderboardRowResource;
+
 
 class LeaderboardController extends Controller
 {
@@ -28,7 +30,7 @@ class LeaderboardController extends Controller
 
         [$q] = $this->buildLeaderboardQuery($data, $season, $order);
 
-        return response()->json($q->paginate($limit));
+        return LeaderboardRowResource::collection($q->paginate($limit));
     }
 
     public function export(Request $request): StreamedResponse

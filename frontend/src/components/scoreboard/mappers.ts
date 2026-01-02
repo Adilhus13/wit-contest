@@ -14,18 +14,19 @@ export const mapRow = (r: LeaderboardApiRow, idx: number): UIPlayerRow => {
 
   return {
     id: safeId,
-    seasonRank: Number(r.season_rank ?? idx + 1),
-    gameRank: Number(r.game_rank ?? idx + 1),
-    jersey: Number(r.jersey_number ?? 0),
-    firstName: r.first_name ?? "",
-    lastName: r.last_name ?? "",
+    playerId: r.playerId,
+    seasonRank: Number(r.seasonRank ?? idx + 1),
+    gameRank: Number(r.gameRank ?? idx + 1),
+    jersey: Number(r.jerseyNumber ?? 0),
+    firstName: r.firstName ?? "",
+    lastName: r.lastName ?? "",
     pos: (r.position ?? "").toUpperCase(),
-    ht: heightInToFtIn(r.height_in),
-    wt: Number(r.weight_lb ?? 0),
+    ht: heightInToFtIn(r.heightIn),
+    wt: Number(r.weightLb ?? 0),
     age: Number(r.age ?? 0),
-    exp: Number(r.experience_years ?? 0),
+    exp: Number(r.experienceYears ?? 0),
     college: r.college ?? "",
-    headshot_url: r.headshot_url ?? "",
+    headshotUrl: r.headshotUrl ?? "",
 
   };
 }
@@ -36,15 +37,15 @@ export const toNullOrNumber = (v: number | ""): number | null => {
 
 export const toPlayerPayload = (values: PlayerFormValues) => {
   return {
-    first_name: values.first_name.trim(),
-    last_name: values.last_name.trim(),
-    jersey_number: Number(values.jersey_number),
+    first_name: values.firstName.trim(),
+    last_name: values.lastName.trim(),
+    jersey_number: Number(values.jerseyNumber),
     position: values.position?.trim() || null,
     status: values.status,
-    height_in: toNullOrNumber(values.height_in),
-    weight_lb: toNullOrNumber(values.weight_lb),
+    height_in: toNullOrNumber(values.heightIn),
+    weight_lb: toNullOrNumber(values.weightLb),
     age: toNullOrNumber(values.age),
-    experience_years: toNullOrNumber(values.experience_years),
+    experience_years: toNullOrNumber(values.experienceYears),
     college: values.college?.trim() || null,
   };
 }
@@ -52,35 +53,37 @@ export const toPlayerPayload = (values: PlayerFormValues) => {
 export const toFormValues = (row?: UIPlayerRow | null): PlayerFormValues => {
   if (!row) {
     return {
-      first_name: "",
-      last_name: "",
-      jersey_number: "",
+      playerId: 0,
+      firstName: "",
+      lastName: "",
+      jerseyNumber: "",
       position: "",
       status: "active",
-      height_in: "",
-      weight_lb: "",
+      heightIn: "",
+      weightLb: "",
       age: "",
-      experience_years: "",
+      experienceYears: "",
       college: "",
     };
   }
 
-  let height_in: number | "" = "";
+  let heightIn: number | "" = "";
   if (row.ht) {
     const [f, i] = row.ht.split("-").map((x) => parseInt(x, 10));
-    if (Number.isFinite(f) && Number.isFinite(i)) height_in = f * 12 + i;
+    if (Number.isFinite(f) && Number.isFinite(i)) heightIn = f * 12 + i;
   }
 
   return {
-    first_name: row.firstName ?? "",
-    last_name: row.lastName ?? "",
-    jersey_number: row.jersey ?? "",
+    playerId: row.playerId ?? 0,
+    firstName: row.firstName ?? "",
+    lastName: row.lastName ?? "",
+    jerseyNumber: row.jersey ?? "",
     position: row.pos ?? "",
     status: "active",
-    height_in,
-    weight_lb: row.wt ?? "",
+    heightIn,
+    weightLb: row.wt ?? "",
     age: row.age ?? "",
-    experience_years: row.exp ?? "",
+    experienceYears: row.exp ?? "",
     college: row.college ?? "",
   };
 }

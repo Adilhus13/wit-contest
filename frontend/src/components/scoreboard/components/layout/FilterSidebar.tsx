@@ -2,8 +2,8 @@
 
 export const FilterSidebar = () => {
   return (
-    <aside className="w-[300px] relative overflow-hidden bg-[linear-gradient(180deg,#C00000_0%,#6B0000_85%)] px-7 py-10">
-      <div className="pointer-events-none absolute -left-24 top-16 h-[2px] w-[520px] rotate-[-16deg] bg-white/20" />
+    <aside className="w-75 relative overflow-hidden bg-[linear-gradient(180deg,#C00000_0%,#6B0000_85%)] px-7 py-10">
+      <div className="pointer-events-none absolute -left-24 top-16 h-0.5 w-130 rotate-[-16deg] bg-white/20" />
 
       <h2  className="text-white font-extrabold tracking-[0.22em] text-[11px] uppercase">
         USER SEGMENTS
@@ -34,7 +34,7 @@ export const FilterSidebar = () => {
       </div>
 
       <div className="mt-5 flex gap-4">
-        <button type="button" className="flex-1 h-10 rounded-full bg-[#F7E37A] text-white text-[11px] font-extrabold tracking-[0.22em] shadow-[0_10px_18px_rgba(0,0,0,0.18)] uppercase">
+        <button type="button" className="flex-1 h-10 rounded-full bg-[#B3995D] text-white text-[11px] font-extrabold tracking-[0.22em] shadow-[0_10px_18px_rgba(0,0,0,0.18)] uppercase">
           APPLY
         </button>
         <button type="button" className="flex-1 h-10 rounded-full bg-[#6B0000] text-white text-[11px] font-extrabold tracking-[0.22em] shadow-[0_10px_18px_rgba(0,0,0,0.18)] uppercase">

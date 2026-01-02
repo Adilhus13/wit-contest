@@ -3,14 +3,14 @@ import { UIPlayerRow } from "../../types";
 type PlayerSummaryCardProps = { player: UIPlayerRow };
 
 export const PlayerSummaryCard = ({ player }: PlayerSummaryCardProps) => {
-  const src = player.headshot_url || "/placeholder-headshot.png";
+  const src = player.headshotUrl || "/placeholder-headshot.png";
   return (
     <div className="flex items-center gap-4">
-      <div className="h-[74px] w-[74px] rounded-2xl bg-[linear-gradient(180deg,#C00000_0%,#6B0000_100%)] shadow-[0_14px_26px_rgba(0,0,0,0.22)] flex items-center justify-center text-[#F7E37A] font-extrabold">
+      <div className="h-18.5 w-18.5 rounded-2xl bg-[linear-gradient(180deg,#C00000_0%,#6B0000_100%)] shadow-[0_14px_26px_rgba(0,0,0,0.22)] flex items-center justify-center text-[#F7E37A] font-extrabold">
         <img
           src={src}
           alt={`${player.firstName} ${player.lastName}`.trim()}
-          className="h-[70px] w-[70px] rounded-2xl object-cover"
+          className="h-17.5 w-17.5 rounded-2xl object-cover"
         />
       </div>
 
