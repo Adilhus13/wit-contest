@@ -1,6 +1,6 @@
 import React from "react";
 
-type Props = {
+type ScoreboardLayoutProps = {
   hero?: React.ReactNode;
   top?: React.ReactNode;
   sidebar?: React.ReactNode;
@@ -8,7 +8,7 @@ type Props = {
   children: React.ReactNode;
 };
 
-export const ScoreboardLayout = ({ hero, top, sidebar, right, children }: Props) => {
+export const ScoreboardLayout = ({ hero, top, sidebar, right, children }: ScoreboardLayoutProps) => {
   return (
     <div className="min-h-screen w-full bg-white">
       {hero ? <div className="h-120">{hero}</div> : null}

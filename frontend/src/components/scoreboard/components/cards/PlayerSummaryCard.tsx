@@ -1,12 +1,15 @@
-import { UiPlayerRow } from "../types";
+import { UIPlayerRow } from "../../types";
 
-export default function PlayerSummaryCard({ player }: { player: UiPlayerRow }) {
+type PlayerSummaryCardProps = { player: UIPlayerRow };
+
+export const PlayerSummaryCard = ({ player }: PlayerSummaryCardProps) => {
+  const src = player.headshot_url || "/placeholder-headshot.png";
   return (
     <div className="flex items-center gap-4">
       <div className="h-[74px] w-[74px] rounded-2xl bg-[linear-gradient(180deg,#C00000_0%,#6B0000_100%)] shadow-[0_14px_26px_rgba(0,0,0,0.22)] flex items-center justify-center text-[#F7E37A] font-extrabold">
         <img
-          src={player.headshot_url}
-          alt={`${player.firstName} ${player.lastName}`}
+          src={src}
+          alt={`${player.firstName} ${player.lastName}`.trim()}
           className="h-[70px] w-[70px] rounded-2xl object-cover"
         />
       </div>
@@ -18,7 +21,7 @@ export default function PlayerSummaryCard({ player }: { player: UiPlayerRow }) {
         </div>
 
         <div className="mt-1 text-[11px] font-extrabold tracking-[0.22em] text-black/70 uppercase">
-          #{player.jersey} &nbsp;&nbsp; OFFENSIVE TACKLE
+          #{player.jersey} &nbsp;&nbsp; {player.pos || "—"}
         </div>
       </div>
     </div>

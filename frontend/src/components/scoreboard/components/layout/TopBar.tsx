@@ -1,5 +1,3 @@
-import React from "react";
-
 type TopBarProps = {
   search: string;
   onSearchChange: (v: string) => void;

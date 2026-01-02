@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import type { LeaderboardResponse, PaginatorMeta, SortKey, SortOrder, UiPlayerRow } from "../types";
+import type { LeaderboardResponse, PaginatorMeta, SortKey, SortOrder, UIPlayerRow } from "../types";
 import { apiGet, getToken } from "../api"; // adjust path
 import { mapRow } from "../mappers";
 
@@ -13,7 +13,7 @@ type Params = {
 };
 
 export const useLeaderboard = (params: Params) => {
-  const [rows, setRows] = useState<UiPlayerRow[]>([]);
+  const [rows, setRows] = useState<UIPlayerRow[]>([]);
   const [meta, setMeta] = useState<PaginatorMeta | null>(null);
   const [loading, setLoading] = useState(true);
 

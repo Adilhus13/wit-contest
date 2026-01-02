@@ -1,7 +1,6 @@
-import React from "react";
-import type { PaginatorMeta } from "../types";
+import type { PaginatorMeta } from "../../types";
 
-type Props = {
+type PaginationBarProps = {
   loading: boolean;
   meta: PaginatorMeta | null;
   page: number;
@@ -9,11 +8,9 @@ type Props = {
   canNext: boolean;
   onPrev: () => void;
   onNext: () => void;
-
   limit: number;
   onLimitChange: (limit: number) => void;
-
-  fallbackCount: number;
+  currentCount: number;
 };
 
 export const PaginationBar = ({
@@ -26,8 +23,8 @@ export const PaginationBar = ({
   onNext,
   limit,
   onLimitChange,
-  fallbackCount,
-}: Props) =>{
+  currentCount,
+}: PaginationBarProps) =>{
   return (
     <div className="mt-4 flex items-center justify-between">
       <div className="text-sm text-black/60">
@@ -38,7 +35,7 @@ export const PaginationBar = ({
             <span className="font-semibold text-black/80">{meta.total}</span>
           </>
         ) : (
-          <span>{loading ? "Loading…" : `Showing ${fallbackCount} rows`}</span>
+          <span>{loading ? "Loading…" : `Showing ${currentCount} rows`}</span>
         )}
       </div>
 
@@ -46,6 +43,7 @@ export const PaginationBar = ({
         <div className="flex items-center gap-2">
           <span className="text-xs font-semibold text-black/60">ROWS</span>
           <select
+            aria-label="Rows per page"
             value={limit}
             onChange={(e) => onLimitChange(Number(e.target.value))}
             className="h-9 rounded-md border border-black/20 px-2 text-sm outline-none"
@@ -58,6 +56,7 @@ export const PaginationBar = ({
         </div>
 
         <button
+          aria-label="Previous page" 
           type="button"
           disabled={!canPrev || loading}
           onClick={onPrev}
@@ -81,8 +80,9 @@ export const PaginationBar = ({
         </div>
 
         <button
+          aria-label="Next page"
           type="button"
-          disabled={!canNext || loading}
+          disabled={!canNext}
           onClick={onNext}
           className={`h-9 px-4 rounded-md border text-sm font-semibold ${
             !canNext || loading

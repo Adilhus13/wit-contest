@@ -1,9 +1,8 @@
-import React from "react";
-import type { UiPlayerRow } from "../types";
+import type { UIPlayerRow } from "../../types";
 
-type Props = {
+type DeletePlayerModalProps = {
   open: boolean;
-  player?: UiPlayerRow | null;
+  player?: UIPlayerRow | null;
   onClose: () => void;
   onConfirm: () => void | Promise<void>;
   confirmDisabled?: boolean;
@@ -15,11 +14,11 @@ export const DeletePlayerModal = ({
   onClose,
   onConfirm,
   confirmDisabled,
-}: Props) => {
+}: DeletePlayerModalProps) => {
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-120">
+    <div role="dialog" aria-modal="true" aria-label="Delete player confirmation" className="fixed inset-0 z-120">
       <button
         type="button"
         className="absolute inset-0 bg-black/40"

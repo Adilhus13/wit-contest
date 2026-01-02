@@ -1,71 +1,17 @@
 import { useEffect, useMemo, useState } from "react";
 import clsx from "clsx";
-import type { LeaderboardRow } from "./LeaderboardTable";
+import { ModalMode, PlayerFormValues, UIPlayerRow } from "../../types";
+import { parseNum, toFormValues } from "../../mappers";
 
-export type PlayerFormValues = {
-  first_name: string;
-  last_name: string;
-  jersey_number: number | "";
-  position: string;
-  status: "active" | "inactive";
-  height_in: number | "";
-  weight_lb: number | "";
-  age: number | "";
-  experience_years: number | "";
-  college: string;
-};
-
-type Props = {
+type CreateEditPlayerModalProps = {
   open: boolean;
-  mode: "create" | "edit";
-  initial?: LeaderboardRow | null;
+  mode: ModalMode;
+  initial?: UIPlayerRow | null;
   onClose: () => void;
   onSubmit: (values: PlayerFormValues) => void;
 };
 
-function toFormValues(row?: LeaderboardRow | null): PlayerFormValues {
-  if (!row) {
-    return {
-      first_name: "",
-      last_name: "",
-      jersey_number: "",
-      position: "",
-      status: "active",
-      height_in: "",
-      weight_lb: "",
-      age: "",
-      experience_years: "",
-      college: "",
-    };
-  }
-
-  let height_in: number | "" = "";
-  if (row.ht) {
-    const [f, i] = row.ht.split("-").map((x) => parseInt(x, 10));
-    if (Number.isFinite(f) && Number.isFinite(i)) height_in = f * 12 + i;
-  }
-
-  return {
-    first_name: row.firstName ?? "",
-    last_name: row.lastName ?? "",
-    jersey_number: row.jersey ?? "",
-    position: row.pos ?? "",
-    status: "active",
-    height_in,
-    weight_lb: row.wt ?? "",
-    age: row.age ?? "",
-    experience_years: row.exp ?? "",
-    college: row.college ?? "",
-  };
-}
-
-function parseNum(v: string): number | "" {
-  if (v.trim() === "") return "";
-  const n = Number(v);
-  return Number.isFinite(n) ? n : "";
-}
-
-export default function PlayerModal({ open, mode, initial, onClose, onSubmit }: Props) {
+export const CreateEditPlayerModal = ({ open, mode, initial, onClose, onSubmit }: CreateEditPlayerModalProps) => {
   const title = mode === "create" ? "CREATE PLAYER" : "EDIT PLAYER";
 
   const initialValues = useMemo(() => toFormValues(initial), [initial]);
@@ -102,12 +48,11 @@ export default function PlayerModal({ open, mode, initial, onClose, onSubmit }: 
       />
 
       {/* modal */}
-      <div className="absolute left-1/2 top-1/2 w-180 -translate-x-1/2 -translate-y-1/2 rounded-2xl bg-white shadow-[0_24px_60px_rgba(0,0,0,0.35)] border border-black/10">
+      <div  role="dialog" aria-modal="true" aria-label="Edit player" className="absolute left-1/2 top-1/2 w-180 -translate-x-1/2 -translate-y-1/2 rounded-2xl bg-white shadow-[0_24px_60px_rgba(0,0,0,0.35)] border border-black/10">
         <div className="px-6 py-5 border-b border-black/10 flex items-center justify-between">
           <div className="text-[13px] font-extrabold tracking-[0.28em] text-[#C00000]">
             {title}
           </div>
-
           <button
             type="button"
             onClick={onClose}
@@ -116,7 +61,6 @@ export default function PlayerModal({ open, mode, initial, onClose, onSubmit }: 
             ✕
           </button>
         </div>
-
         <div className="px-6 py-5">
           <div className="grid grid-cols-2 gap-4">
             <Field
@@ -124,6 +68,7 @@ export default function PlayerModal({ open, mode, initial, onClose, onSubmit }: 
               error={touched.first_name ? errors.first_name : undefined}
             >
               <input
+                name='firstName'
                 value={values.first_name}
                 onChange={(e) => setValues((p) => ({ ...p, first_name: e.target.value }))}
                 onBlur={() => setTouched((p) => ({ ...p, first_name: true }))}
@@ -136,6 +81,7 @@ export default function PlayerModal({ open, mode, initial, onClose, onSubmit }: 
               error={touched.last_name ? errors.last_name : undefined}
             >
               <input
+                name='lastName'
                 value={values.last_name}
                 onChange={(e) => setValues((p) => ({ ...p, last_name: e.target.value }))}
                 onBlur={() => setTouched((p) => ({ ...p, last_name: true }))}
@@ -148,6 +94,7 @@ export default function PlayerModal({ open, mode, initial, onClose, onSubmit }: 
               error={touched.jersey_number ? errors.jersey_number : undefined}
             >
               <input
+                name='jerseyNumber'
                 inputMode="numeric"
                 value={values.jersey_number}
                 onChange={(e) =>
@@ -160,6 +107,7 @@ export default function PlayerModal({ open, mode, initial, onClose, onSubmit }: 
 
             <Field label="POSITION">
               <input
+                name='position'
                 value={values.position}
                 onChange={(e) => setValues((p) => ({ ...p, position: e.target.value }))}
                 className={inputCls(false)}
@@ -168,8 +116,9 @@ export default function PlayerModal({ open, mode, initial, onClose, onSubmit }: 
 
             <Field label="STATUS">
               <select
+                name='status'
                 value={values.status}
-                onChange={(e) => setValues((p) => ({ ...p, status: e.target.value as any }))}
+                onChange={(e) => setValues((p) => ({ ...p, status: e.target.value as PlayerFormValues["status"] }))}
                 className={inputCls(false)}
               >
                 <option value="active">active</option>
@@ -179,6 +128,7 @@ export default function PlayerModal({ open, mode, initial, onClose, onSubmit }: 
 
             <Field label="HEIGHT (IN)">
               <input
+                name='height'
                 inputMode="numeric"
                 value={values.height_in}
                 onChange={(e) =>
@@ -190,6 +140,7 @@ export default function PlayerModal({ open, mode, initial, onClose, onSubmit }: 
 
             <Field label="WEIGHT (LB)">
               <input
+                name='weight'
                 inputMode="numeric"
                 value={values.weight_lb}
                 onChange={(e) =>
@@ -201,6 +152,7 @@ export default function PlayerModal({ open, mode, initial, onClose, onSubmit }: 
 
             <Field label="AGE">
               <input
+                name='age'
                 inputMode="numeric"
                 value={values.age}
                 onChange={(e) => setValues((p) => ({ ...p, age: parseNum(e.target.value) }))}
@@ -210,6 +162,7 @@ export default function PlayerModal({ open, mode, initial, onClose, onSubmit }: 
 
             <Field label="EXPERIENCE (YRS)">
               <input
+                name='experienceYears'
                 inputMode="numeric"
                 value={values.experience_years}
                 onChange={(e) =>
@@ -221,6 +174,7 @@ export default function PlayerModal({ open, mode, initial, onClose, onSubmit }: 
 
             <Field label="COLLEGE">
               <input
+                name='college'
                 value={values.college}
                 onChange={(e) => setValues((p) => ({ ...p, college: e.target.value }))}
                 className={inputCls(false)}
@@ -265,7 +219,7 @@ export default function PlayerModal({ open, mode, initial, onClose, onSubmit }: 
   );
 }
 
-function Field({
+const Field = ({
   label,
   error,
   children,
@@ -273,7 +227,7 @@ function Field({
   label: string;
   error?: string;
   children: React.ReactNode;
-}) {
+}) => {
   return (
     <div>
       <div className="text-[11px] font-extrabold tracking-[0.22em] uppercase text-black/60">
@@ -285,7 +239,7 @@ function Field({
   );
 }
 
-function inputCls(hasError: boolean) {
+const inputCls = (hasError: boolean) => {
   return clsx(
     "h-10 w-full rounded-md border px-3 text-sm outline-none",
     hasError ? "border-[#C00000]" : "border-black/20",

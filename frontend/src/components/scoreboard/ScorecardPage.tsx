@@ -1,28 +1,29 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import TopScoreboard from "./components/TopScoreboard";
-import { FilterSidebar } from "./components/FilterSidebar";
-import LeaderboardTable from "./components/LeaderboardTable";
-import RightPanel from "./components/RightPanel";
-import { apiDelete, apiGet, apiPost, apiPut, exportLeaderboardCsv, getToken } from "@/components/scoreboard/api";
-import PlayerModal, { PlayerFormValues } from "./components/PlayerModal";
+import { TopScoreboard } from "./components/cards/TopScoreboard";
+import { FilterSidebar } from "./components/layout/FilterSidebar";
+import { LeaderboardTable } from "./components/table/LeaderboardTable";
+import { RightPanel } from "./components/cards/RightPanel";
+import { apiDelete, apiPost, apiPut, exportLeaderboardCsv, getToken } from "@/components/scoreboard/api";
+import { CreateEditPlayerModal } from "./components/modals/CreateEditPlayerModal";
 import type {
+  ModalMode,
+  PlayerFormValues,
   SortKey,
   SortOrder,
 } from "./types";
 
 import { toPlayerPayload } from "./mappers"
-import { TopBar } from "./components/TopBar";
-import { DeletePlayerModal } from "./components/DeletePlayerModal";
-import { ScoreboardLayout } from "./components/ScorecardLayout";
-import { PaginationBar } from "./components/PaginationBar";
+import { TopBar } from "./components/layout/TopBar";
+import { DeletePlayerModal } from "./components/modals/DeletePlayerModal";
+import { ScoreboardLayout } from "./components/layout/ScorecardLayout";
+import { PaginationBar } from "./components/table/PaginationBar";
 import { usePagination } from "./hooks/usePagination";
 import { useLeaderboard } from "./hooks/useLeaderboard";
 import { useDebouncedValue } from "./hooks/useDebouncedValue";
 
 const SEASON = 2023;
-type ModalMode = "create" | "edit";
 
 export default function DashboardPage() {
   const [search, setSearch] = useState<string>("");
@@ -32,6 +33,7 @@ export default function DashboardPage() {
   const [modalMode, setModalMode] = useState<ModalMode>("create");
   const [deleteOpen, setDeleteOpen] = useState<boolean>(false);
   const [selectedId, setSelectedId] = useState<number | null>(null);
+  
   const { page, limit, setPage, onPrev, onNext, resetPage, onLimitChange, buildFlags } = usePagination({
     initialLimit: 20,
   });
@@ -141,11 +143,11 @@ export default function DashboardPage() {
         onNext={onNext}
         onLimitChange={onLimitChange}
         limit={limit}
-        fallbackCount={rows.length}
+        currentCount={rows.length}
       />
 
       {loading && <div className="mt-3 text-sm text-black/50">Loading leaderboard…</div>}
-      <PlayerModal
+      <CreateEditPlayerModal
         open={modalOpen}
         mode={modalMode}
         initial={modalMode === "edit" ? selected : null}

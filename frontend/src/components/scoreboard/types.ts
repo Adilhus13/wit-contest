@@ -25,7 +25,7 @@ export type LeaderboardResponse = {
   meta: PaginatorMeta;
 };
 
-export type UiPlayerRow = {
+export type UIPlayerRow = {
   id: number;
   seasonRank: number;
   gameRank: number;
@@ -50,3 +50,44 @@ export type PaginatorMeta = {
   to?: number | null;
 };
 
+export type GameDto = {
+  id: number;
+  season?: number | null;
+  date: string;
+  stadium: string | null;
+  opponentCity: string | null;
+  opponentName: string | null;
+  result: "W" | "L";
+  score: string;
+  logo_url: string;
+};
+
+export type PlayerFormValues = {
+  first_name: string;
+  last_name: string;
+  jersey_number: number | "";
+  position: string;
+  status: "active" | "inactive";
+  height_in: number | "";
+  weight_lb: number | "";
+  age: number | "";
+  experience_years: number | "";
+  college: string;
+};
+
+export type LeaderboardRow = {
+  id: number;
+  seasonRank: number;
+  gameRank: number;
+  jersey: number;
+  firstName: string;
+  lastName: string;
+  pos: string;
+  ht: string;     
+  wt: number;    
+  age: number;
+  exp: number;
+  college: string;
+};
+
+export type ModalMode = "create" | "edit";

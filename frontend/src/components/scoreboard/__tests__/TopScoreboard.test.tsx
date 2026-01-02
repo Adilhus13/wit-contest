@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
-import TopScoreboard from '../../scoreboard/components/TopScoreboard';
+import TopScoreboard from '../components/cards/TopScoreboard';
 
 jest.mock('@/lib/api', () => ({
   apiGet: jest.fn(),

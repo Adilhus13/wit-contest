@@ -1,5 +1,4 @@
-import { PlayerFormValues } from "./components/PlayerModal";
-import { LeaderboardApiRow, UiPlayerRow } from "./types";
+import { LeaderboardApiRow, PlayerFormValues, UIPlayerRow } from "./types";
 
 export const heightInToFtIn = (heightIn: number | null | undefined): string => {
   if (!heightIn || heightIn <= 0) return "";
@@ -8,8 +7,8 @@ export const heightInToFtIn = (heightIn: number | null | undefined): string => {
   return `${feet}-${inches}`;
 }
 
-export const mapRow = (r: LeaderboardApiRow, idx: number): UiPlayerRow => {
-  const rawId = (r as any).id ?? (r as any).player_id; 
+export const mapRow = (r: LeaderboardApiRow, idx: number): UIPlayerRow => {
+  const rawId = (r as any).id ?? (r as any).player_id;
   const id = Number(rawId);
   const safeId = Number.isFinite(id) && id > 0 ? id : idx + 1;
 
@@ -48,4 +47,46 @@ export const toPlayerPayload = (values: PlayerFormValues) => {
     experience_years: toNullOrNumber(values.experience_years),
     college: values.college?.trim() || null,
   };
+}
+
+export const toFormValues = (row?: UIPlayerRow | null): PlayerFormValues => {
+  if (!row) {
+    return {
+      first_name: "",
+      last_name: "",
+      jersey_number: "",
+      position: "",
+      status: "active",
+      height_in: "",
+      weight_lb: "",
+      age: "",
+      experience_years: "",
+      college: "",
+    };
+  }
+
+  let height_in: number | "" = "";
+  if (row.ht) {
+    const [f, i] = row.ht.split("-").map((x) => parseInt(x, 10));
+    if (Number.isFinite(f) && Number.isFinite(i)) height_in = f * 12 + i;
+  }
+
+  return {
+    first_name: row.firstName ?? "",
+    last_name: row.lastName ?? "",
+    jersey_number: row.jersey ?? "",
+    position: row.pos ?? "",
+    status: "active",
+    height_in,
+    weight_lb: row.wt ?? "",
+    age: row.age ?? "",
+    experience_years: row.exp ?? "",
+    college: row.college ?? "",
+  };
+}
+
+export const parseNum = (v: string): number | "" => {
+  if (v.trim() === "") return "";
+  const n = Number(v);
+  return Number.isFinite(n) ? n : "";
 }
