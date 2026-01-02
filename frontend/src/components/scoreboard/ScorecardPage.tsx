@@ -20,7 +20,6 @@ import { TopBar } from "./components/layout/TopBar";
 import { DeletePlayerModal } from "./components/modals/DeletePlayerModal";
 import { ScoreboardLayout } from "./components/layout/ScorecardLayout";
 import { PaginationBar } from "./components/table/PaginationBar";
-import { usePagination } from "./hooks/usePagination";
 import { useLeaderboard } from "./hooks/useLeaderboard";
 import { useDebouncedValue } from "./hooks/useDebouncedValue";
 import { useRouter, useSearchParams } from "next/navigation";
