@@ -3,7 +3,6 @@ import "@testing-library/jest-dom";
 import userEvent from "@testing-library/user-event";
 import { HeaderCell } from "../HeaderCell";
 
-type SortKey = "season_rank" | "name" | "jersey";
 type SortOrder = "asc" | "desc";
 
 describe("HeaderCell", () => {
@@ -70,7 +69,7 @@ describe("HeaderCell", () => {
         <HeaderCell
         label="RANK"
         sortKey={"season_rank"}
-        activeSort={"season_rank"} // ✅ must match sortKey to be active
+        activeSort={"season_rank"}
         order={"asc" as SortOrder}
         onSortChange={jest.fn()}
         />
