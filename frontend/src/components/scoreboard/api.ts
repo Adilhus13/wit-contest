@@ -1,6 +1,8 @@
 import { downloadBlob } from "@/lib/download";
 
 const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+let cachedToken: string | null = null;
+let inFlightToken: Promise<string> | null = null;
 
 
 if (!baseUrl) throw new Error("NEXT_PUBLIC_API_BASE_URL missing");
@@ -8,27 +10,42 @@ if (!baseUrl) throw new Error("NEXT_PUBLIC_API_BASE_URL missing");
 type TokenResponse = { token: string; token_type: string };
 
 export const getToken = async (): Promise<string> => {
-  const email = process.env.NEXT_PUBLIC_API_EMAIL!;
-  const password = process.env.NEXT_PUBLIC_API_PASSWORD!;
+  if (cachedToken) return cachedToken;
+  if (inFlightToken) return inFlightToken;
 
-  const res = await fetch(`${baseUrl}/auth/token`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email, password, device_name: "frontend" }),
-    cache: "no-store",
-  });
+  inFlightToken = (async () => {
+    const email = process.env.NEXT_PUBLIC_API_EMAIL!;
+    const password = process.env.NEXT_PUBLIC_API_PASSWORD!;
 
-  if (!res.ok) throw new Error(await res.text());
-  const json = (await res.json()) as TokenResponse;
-  return json.token;
-}
+    const res = await fetch(`${baseUrl}/auth/token`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password, device_name: "frontend" }),
+      cache: "no-store",
+    });
+
+    if (!res.ok) {
+      inFlightToken = null;
+      throw new Error(await res.text());
+    }
+
+    const json = (await res.json()) as TokenResponse;
+    cachedToken = json.token;
+    inFlightToken = null;
+    return cachedToken;
+  })();
+
+  return inFlightToken;
+};
+
 
 export const request = async <T>(
   method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE",
   path: string,
-  token: string,
   body?: unknown
 ): Promise<T> => {
+  const token = await getToken();
+
   const res = await fetch(`${baseUrl}${path}`, {
     method,
     headers: {
@@ -40,9 +57,13 @@ export const request = async <T>(
     cache: "no-store",
   });
 
-  if(!res.ok) {
+  if (res.status === 401) {
+    cachedToken = null;
+  }
+
+  if (!res.ok) {
     const text = await res.text();
-    throw new Error (`${method}${path} failed (${res.status}): ${text}`);
+    throw new Error(`${method}${path} failed (${res.status}): ${text}`);
   }
 
   if (res.status === 204) return undefined as T
@@ -50,24 +71,17 @@ export const request = async <T>(
   return (await res.json()) as T
 }
 
-export const apiGet = async <T>(path: string, token: string): Promise<T> => {
-  const res = await fetch(`${baseUrl}${path}`, {
-    headers: { Authorization: `Bearer ${token}` },
-    cache: "no-store",
-  });
+export const apiGet = async <T>(path: string): Promise<T> =>
+  request<T>("GET", path);
 
-  if (!res.ok) throw new Error(await res.text());
-  return (await res.json()) as T;
-}
+export const apiPost = async <T>(path: string, body: unknown): Promise<T> =>
+  request<T>("POST", path, body);
 
-export const apiPost = async <T>(path: string, token: string, body: unknown): Promise<T> =>
-  request<T>("POST", path, token, body);
+export const apiPut = async <T>(path: string, body: unknown): Promise<T> =>
+  request<T>("PUT", path, body);
 
-export const apiPut = async <T>(path: string, token: string, body: unknown): Promise<T> =>
-  request<T>("PUT", path, token, body);
-
-export const apiDelete = async <T>(path: string, token: string): Promise<T> =>
-  request<T>("DELETE", path, token);
+export const apiDelete = async <T>(path: string,): Promise<T> =>
+  request<T>("DELETE", path);
 
 
 export const exportLeaderboardCsv = async (params: {

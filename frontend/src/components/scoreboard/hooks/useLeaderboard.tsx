@@ -12,7 +12,7 @@ type Params = {
   search: string;
 };
 
-export const useLeaderboard = (params: Params) => {
+export const useLeaderboard = ({ season, limit, page, sort, order, search }: Params) => {
   const [rows, setRows] = useState<UIPlayerRow[]>([]);
   const [meta, setMeta] = useState<PaginatorMeta | null>(null);
   const [loading, setLoading] = useState(true);
@@ -20,19 +20,18 @@ export const useLeaderboard = (params: Params) => {
   const refetch = useCallback(async () => {
     setLoading(true);
     try {
-      const token = await getToken();
 
       const qs = new URLSearchParams({
-        season: String(params.season),
-        limit: String(params.limit),
-        page: String(params.page),
-        sort: params.sort,
-        order: params.order,
+        season: String(season),
+        limit: String(limit),
+        page: String(page),
+        sort,
+        order,
       });
 
-      if (params.search) qs.set("search", params.search);
+      if (search) qs.set("search", search);
 
-      const res = await apiGet<LeaderboardResponse>(`/leaderboard?${qs.toString()}`, token);
+      const res = await apiGet<LeaderboardResponse>(`/leaderboard?${qs.toString()}`);
 
       setRows(res.data.map(mapRow));
       setMeta(res.meta ?? null);
@@ -43,11 +42,11 @@ export const useLeaderboard = (params: Params) => {
     } finally {
       setLoading(false);
     }
-  }, [params.season, params.limit, params.page, params.sort, params.order, params.search]);
+  }, [season, limit, page, sort, order, search]);
 
   useEffect(() => {
     void refetch();
   }, [refetch]);
 
   return { rows, meta, loading, refetch };
-}
+};

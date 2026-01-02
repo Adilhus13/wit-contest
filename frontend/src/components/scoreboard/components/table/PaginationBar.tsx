@@ -58,7 +58,7 @@ export const PaginationBar = ({
         <button
           aria-label="Previous page" 
           type="button"
-          disabled={!canPrev || loading}
+          disabled={!canPrev}
           onClick={onPrev}
           className={`h-9 px-4 rounded-md border text-sm font-semibold ${
             !canPrev || loading
